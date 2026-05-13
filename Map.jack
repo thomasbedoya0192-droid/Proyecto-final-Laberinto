@@ -1,0 +1,98 @@
+/**
+ * Clase Map: Gestiona la matriz del laberinto, el renderizado 
+ * y las colisiones.
+ */
+class Map {
+    field Array grid;     // Nuestro arreglo 1D que simulará un 2D
+    field int cols, rows; // 32 y 16
+    field int cellSize;   // 16 pixeles
+
+    /** Construye un nuevo mapa y define los muros iniciales */
+    constructor Map new() {
+        var int i;
+
+        let cols = 32;
+        let rows = 16;
+        let cellSize = 16;
+        let grid = Array.new(512); // 32 * 16 = 512
+        
+        let i = 0;
+        // Primero, llenamos todo de caminos vacíos (0)
+        while (i < 512) {
+            let grid[i] = 0;
+            let i = i + 1;
+        }
+
+        // Ahora, vamos a crear un muro alrededor de los bordes para probar
+        // Muros superior e inferior
+        let i = 0;
+        while (i < cols) {
+            let grid[i] = 1;               // Fila 0 (arriba)
+            let grid[480 + i] = 1;         // Fila 15 (abajo) -> 15 * 32 = 480
+            let i = i + 1;
+        }
+
+        // Muros laterales (izquierdo y derecho)
+        let i = 0;
+        while (i < rows) {
+            let grid[i * cols] = 1;            // Columna 0 (izquierda)
+            let grid[(i * cols) + 31] = 1;     // Columna 31 (derecha)
+            let i = i + 1;
+        }
+
+        return this;
+    }
+
+    /** Dibuja el laberinto en la pantalla */
+    method void draw() {
+        var int row, col, index;
+        var int x, y;
+
+        let row = 0;
+        let index = 0;
+
+        // Recorremos las filas
+        while (row < rows) {
+            let col = 0;
+            // Recorremos las columnas
+            while (col < cols) {
+                if (grid[index] = 1) { // Si hay un muro (1)
+                    let x = col * cellSize;
+                    let y = row * cellSize;
+                    do Screen.setColor(true); // true = pixel negro
+                    // Dibujamos un cuadrado de 16x16
+                    do Screen.drawRectangle(x, y, x + (cellSize - 1), y + (cellSize - 1));
+                }
+                let col = col + 1;
+                let index = index + 1;
+            }
+            let row = row + 1;
+        }
+        return;
+    }
+
+    /** Verifica si una coordenada específica es un muro */
+    method boolean isWall(int col, int row) {
+        var int index;
+        
+        // Prevención de errores: si intentan salir de la pantalla
+        if ((col < 0) | (col > 31) | (row < 0) | (row > 15)) {
+            return true;
+        }
+
+        let index = (row * cols) + col;
+        
+        if (grid[index] = 1) {
+            return true;
+        }
+        
+        return false;
+    }
+
+    /** Libera la memoria cuando el juego termine */
+    method void dispose() {
+        do grid.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+}
