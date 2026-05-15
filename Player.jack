@@ -1,0 +1,150 @@
+/**
+ * Player.jack: Personaje principal (cara triste de 12x12 pixeles) con
+ * movimiento libre de 1 pixel en ambos ejes y deteccion de colisiones
+ * mediante bounding box completo de 12x12 contra el mapa.
+ *
+ * Coordenadas:
+ *   - (x, y) representan la esquina superior izquierda del sprite.
+ *   - El sprite ocupa pixeles x..x+11 (12 columnas) y y..y+11 (12 filas).
+ *   - El bounding box de colision coincide con el sprite visual: las
+ *     4 esquinas se chequean contra muros mediante Map.collidesPixelRect.
+ *
+ * Patron de la cara (12x12, replicado del bitmap editor de Nand2Tetris):
+ *   - Marco perimetral completo.
+ *   - Cejas inclinadas hacia abajo (gesto triste/preocupado).
+ *   - Ojos pequenos en fila 4.
+ *   - Boca con forma de arco hacia abajo (boca triste) en filas 6-9.
+ */
+class Player {
+    field int x, y;     // posicion en pixeles (esquina superior izq)
+    field Map gameMap;  // referencia al mapa para validar colisiones
+
+    /** Crea el jugador en la posicion (initX, initY). */
+    constructor Player new(int initX, int initY, Map aMap) {
+        let x = initX;
+        let y = initY;
+        let gameMap = aMap;
+        do draw();
+        return this;
+    }
+
+    /** Libera la memoria. */
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    /** Devuelve x actual. */
+    method int getX() { return x; }
+
+    /** Devuelve y actual. */
+    method int getY() { return y; }
+
+    /**
+     * Dibuja la cara triste de 12x12 pixeles en (x, y).
+     * El patron replica exactamente el diseno del bitmap editor de
+     * Nand2Tetris, dibujado pixel a pixel con Screen.drawPixel para
+     * permitir cualquier posicion (no alineada a word).
+     */
+    method void draw() {
+        do Screen.setColor(true);
+
+        // Fila 0: borde superior completo
+        do Screen.drawLine(x, y, x + 11, y);
+
+        // Fila 1: solo marco (cols 0 y 11)
+        do Screen.drawPixel(x, y + 1);
+        do Screen.drawPixel(x + 11, y + 1);
+
+        // Fila 2: marco + ceja izquierda (col 3) + ceja derecha (col 8)
+        do Screen.drawPixel(x, y + 2);
+        do Screen.drawPixel(x + 3, y + 2);
+        do Screen.drawPixel(x + 8, y + 2);
+        do Screen.drawPixel(x + 11, y + 2);
+
+        // Fila 3: marco + ceja izq (col 2) + ceja der (col 9)
+        do Screen.drawPixel(x, y + 3);
+        do Screen.drawPixel(x + 2, y + 3);
+        do Screen.drawPixel(x + 9, y + 3);
+        do Screen.drawPixel(x + 11, y + 3);
+
+        // Fila 4: marco + ojo izq (col 4) + ojo der (col 7)
+        do Screen.drawPixel(x, y + 4);
+        do Screen.drawPixel(x + 4, y + 4);
+        do Screen.drawPixel(x + 7, y + 4);
+        do Screen.drawPixel(x + 11, y + 4);
+
+        // Fila 5: solo marco
+        do Screen.drawPixel(x, y + 5);
+        do Screen.drawPixel(x + 11, y + 5);
+
+        // Fila 6: marco + parte superior de boca (cols 4..7)
+        do Screen.drawPixel(x, y + 6);
+        do Screen.drawLine(x + 4, y + 6, x + 7, y + 6);
+        do Screen.drawPixel(x + 11, y + 6);
+
+        // Fila 7: marco + extremos de boca (cols 3 y 8)
+        do Screen.drawPixel(x, y + 7);
+        do Screen.drawPixel(x + 3, y + 7);
+        do Screen.drawPixel(x + 8, y + 7);
+        do Screen.drawPixel(x + 11, y + 7);
+
+        // Fila 8: marco + base de boca abierta (cols 2..9)
+        do Screen.drawPixel(x, y + 8);
+        do Screen.drawLine(x + 2, y + 8, x + 9, y + 8);
+        do Screen.drawPixel(x + 11, y + 8);
+
+        // Fila 9: marco + esquinas inferiores de boca (cols 2 y 9)
+        do Screen.drawPixel(x, y + 9);
+        do Screen.drawPixel(x + 2, y + 9);
+        do Screen.drawPixel(x + 9, y + 9);
+        do Screen.drawPixel(x + 11, y + 9);
+
+        // Fila 10: solo marco
+        do Screen.drawPixel(x, y + 10);
+        do Screen.drawPixel(x + 11, y + 10);
+
+        // Fila 11: borde inferior completo
+        do Screen.drawLine(x, y + 11, x + 11, y + 11);
+
+        return;
+    }
+
+    /** Borra el bounding box completo (12x12) en la posicion actual. */
+    method void erase() {
+        do Screen.setColor(false);
+        do Screen.drawRectangle(x, y, x + 11, y + 11);
+        return;
+    }
+
+    /**
+     * Intenta mover el sprite (dx, dy) pixeles. Si la nueva posicion
+     * colisiona con un muro, el movimiento se cancela y el sprite no
+     * se redibuja (se mantiene en su lugar).
+     *
+     * Se evalua el bounding box completo del sprite (12x12): las 4
+     * esquinas se mapean a celdas y se consulta Map.isWall en cada una.
+     * El borrado/redibujo solo ocurre cuando hay movimiento valido,
+     * para evitar parpadeo innecesario.
+     */
+    method void tryMove(int dx, int dy) {
+        var int newX, newY;
+        let newX = x + dx;
+        let newY = y + dy;
+
+        if (gameMap.collidesPixelRect(newX, newY, newX + 11, newY + 11)) {
+            return;  // colision: cancelar movimiento
+        }
+
+        do erase();
+        let x = newX;
+        let y = newY;
+        do draw();
+        return;
+    }
+
+    method void moveUp()    { do tryMove(0, -1); return; }
+    method void moveDown()  { do tryMove(0, 1);  return; }
+    method void moveLeft()  { do tryMove(-1, 0); return; }
+    method void moveRight() { do tryMove(1, 0);  return; }
+}
