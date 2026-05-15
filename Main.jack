@@ -1,14 +1,28 @@
 /**
- * Main.jack: Punto de entrada del proyecto Maze Intelligence.
- * Construye el juego (mapa + jugador), ejecuta el bucle principal y
- * libera la memoria al terminar.
+ * Main.jack: Clase principal para probar el renderizado del mapa
+ * del proyecto Maze Intelligence.
  */
 class Main {
     function void main() {
-        var PlayerGame game;
-        let game = PlayerGame.new();
-        do game.run();
-        do game.dispose();
+        var Map gameMap;
+
+        // 1. Instanciamos el mapa (se ejecuta el constructor que definimos)
+        let gameMap = Map.new();
+
+        // 2. Limpiamos la pantalla antes de dibujar (buena práctica)
+        do Screen.clearScreen();
+
+        // 3. Dibujamos el laberinto
+        do gameMap.draw();
+
+        // 4. Bucle infinito para que el programa no termine 
+        // y podamos ver el resultado en el emulador.
+        while (true) {
+            // El programa se queda aquí "congelado" mostrando el mapa
+        }
+
+        // 5. Liberamos memoria (aunque en este caso no llegaremos aquí)
+        do gameMap.dispose();
         return;
     }
 }
