@@ -1,14 +1,23 @@
 /**
  * Main.jack: Punto de entrada del proyecto Maze Intelligence.
- * Construye el juego (mapa + jugador), ejecuta el bucle principal y
- * libera la memoria al terminar.
+ *
+ * Bucle externo de partidas: crea un PlayerGame, lo ejecuta y libera
+ * memoria. Cuando run() devuelve, decide si reiniciar otra partida
+ * (game over -> el jugador pidio reiniciar) o salir definitivamente
+ * (Q en cualquier momento).
  */
 class Main {
     function void main() {
         var PlayerGame game;
-        let game = PlayerGame.new();
-        do game.run();
-        do game.dispose();
+        var boolean playAgain;
+
+        let playAgain = true;
+        while (playAgain) {
+            let game = PlayerGame.new();
+            do game.run();
+            let playAgain = game.wantsRestart();
+            do game.dispose();
+        }
         return;
     }
 }

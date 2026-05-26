@@ -1,63 +1,92 @@
 /**
- * PlayerGame.jack: Game loop principal. Lee el teclado de forma continua
- * y mueve al jugador 1 pixel por iteracion mientras la tecla este
- * presionada. La logica de colisiones la encapsula Player a traves de
- * Map, asi que aqui solo despachamos direcciones.
+ * PlayerGame.jack: Game loop principal. Lee el teclado de forma continua,
+ * mueve al jugador 3 pixeles por iteracion y al enemigo cada 2 frames
+ * usando IA greedy con escape de paredes (4 intentos).
+ *
+ * Termina cuando el jugador pulsa Q (salida voluntaria) o cuando el
+ * enemigo lo alcanza (game over). Tras game over, espera tecla:
+ *   - Q  -> sale del programa.
+ *   - Cualquier otra tecla -> reinicia la partida (Main vuelve a crear
+ *     un nuevo PlayerGame).
  *
  * Controles:
- *   Flecha arriba   (130 en algunas teclas, 131 segun la convencion Jack)
- *   En el emulador estandar de Nand2Tetris:
- *     131 = Up, 133 = Down, 130 = Left, 132 = Right, 81 = 'Q' (salir)
+ *   131 = Up, 133 = Down, 130 = Left, 132 = Right, 81 = 'Q' (salir)
  */
 class PlayerGame {
     field Map gameMap;
     field Player player;
-    field int direction;   // 0=nada, 1=up, 2=down, 3=left, 4=right
+    field Enemy enemy;
+    field int direction;    // 0=nada, 1=up, 2=down, 3=left, 4=right
+    field int frameCount;   // contador para ritmar la IA del enemigo
+    field boolean gameOver; // true cuando el enemigo alcanza al jugador
+    field boolean restart;  // true si tras game over el jugador quiere reiniciar
 
-    /** Crea el juego: mapa + jugador en posicion inicial segura. */
+    /** Crea el juego: mapa + jugador + enemigo en spawns seguros. */
     constructor PlayerGame new() {
         let gameMap = Map.new();
         do Screen.clearScreen();
         do gameMap.draw();
 
-        // Spawn en celda (1,1) interior: pixel (18, 18).
-        // Sprite 12x12 -> ocupa pixeles (18..29, 18..29), todos dentro
-        // de la celda (1,1) que es camino libre.
+        // Jugador: celda interior (1,1) -> pixel (18, 18). Sprite 12x12.
         let player = Player.new(18, 18, gameMap);
 
+        // Enemigo: celda libre (28, 14) -> pixel (450, 226). Sprite 12x12.
+        let enemy = Enemy.new(450, 226, gameMap);
+
         let direction = 0;
+        let frameCount = 0;
+        let gameOver = false;
+        let restart = false;
         return this;
     }
 
-    /** Libera la memoria de juego, jugador y mapa. */
+    /** Libera la memoria de juego, jugador, enemigo y mapa. */
     method void dispose() {
+        do enemy.dispose();
         do player.dispose();
         do gameMap.dispose();
         do Memory.deAlloc(this);
         return;
     }
 
-    /** Aplica el movimiento correspondiente a la direccion actual. */
-    method void movePlayer() {
+    /** Consulta si tras terminar el run el jugador quiere reiniciar. */
+    method boolean wantsRestart() {
+        return restart;
+    }
+
+    /**
+     * Avanza un frame: mueve jugador segun direccion, mueve enemigo
+     * cada 2 frames y chequea colision jugador-enemigo.
+     */
+    method void tick() {
         if (direction = 1) { do player.moveUp(); }
         if (direction = 2) { do player.moveDown(); }
         if (direction = 3) { do player.moveLeft(); }
         if (direction = 4) { do player.moveRight(); }
-        // Pequeña pausa para que el movimiento sea perceptible
-        // (con 1px por frame, sin pausa seria demasiado rapido).
+
+        // Enemigo se mueve cada 2 frames. Con el jugador a 3 px/frame
+        // y el enemigo a 3 px cada 2 frames, el jugador es ~2x mas
+        // rapido en linea recta pero el enemigo gana terreno cuando
+        // dudas en cruces o estas alineado con el.
+        let frameCount = frameCount + 1;
+        if ((frameCount / 2) * 2 = frameCount) {
+            do enemy.chase(player.getX(), player.getY());
+        }
+
+        // Chequeo de colision: si el enemigo solapa al jugador -> game over.
+        if (enemy.collidesWith(player.getX(), player.getY())) {
+            let gameOver = true;
+        }
+
+        // Pausa para que el movimiento sea perceptible.
         do Sys.wait(15);
         return;
     }
 
     /**
-     * Bucle principal: lee teclado y mueve al jugador. Sale al pulsar Q.
-     *
-     * Patron clasico Nand2Tetris:
-     *   - Mientras no haya tecla, intenta moverse en la ultima direccion
-     *     (con direction=0 no hace nada, simplemente espera).
-     *   - Al detectar tecla, actualiza direction.
-     *   - Mientras la tecla siga presionada, sigue moviendose.
-     *   - Al soltar, vuelve a direction=0.
+     * Bucle principal: lee teclado y actualiza el mundo. Sale al pulsar Q
+     * o cuando el enemigo atrapa al jugador. La logica de reinicio vive
+     * en Main; aqui solo se decide si restart=true al terminar.
      */
     method void run() {
         var char key;
@@ -66,25 +95,77 @@ class PlayerGame {
         let key = 0;
 
         while (~exit) {
-            // Esperar a que se presione una tecla (con movimiento continuo
-            // mientras direction != 0 desde el ciclo anterior).
-            while (key = 0) {
+            // Esperar tecla con movimiento continuo (jugador en ultima
+            // direccion, enemigo persiguiendo).
+            while ((key = 0) & (~gameOver)) {
                 let key = Keyboard.keyPressed();
-                do movePlayer();
+                do tick();
             }
 
-            if (key = 81)  { let exit = true; }       // Q -> salir
-            if (key = 131) { let direction = 1; }     // flecha arriba
-            if (key = 133) { let direction = 2; }     // flecha abajo
-            if (key = 130) { let direction = 3; }     // flecha izquierda
-            if (key = 132) { let direction = 4; }     // flecha derecha
+            if (gameOver) {
+                let exit = true;
+            } else {
+                if (key = 81)  { let exit = true; }       // Q -> salir
+                if (key = 131) { let direction = 1; }     // arriba
+                if (key = 133) { let direction = 2; }     // abajo
+                if (key = 130) { let direction = 3; }     // izquierda
+                if (key = 132) { let direction = 4; }     // derecha
 
-            // Mientras la tecla siga presionada, mover continuamente.
-            while (~(key = 0)) {
-                let key = Keyboard.keyPressed();
-                do movePlayer();
+                // Mientras la tecla siga presionada, seguir actualizando.
+                while ((~(key = 0)) & (~gameOver)) {
+                    let key = Keyboard.keyPressed();
+                    do tick();
+                }
+                let direction = 0;
+                if (gameOver) { let exit = true; }
             }
-            let direction = 0;
+        }
+
+        // Si fue game over, mostrar pantalla y leer decision del jugador.
+        if (gameOver) {
+            do showGameOver();
+        }
+        return;
+    }
+
+    /**
+     * Pantalla de Game Over.
+     *   - Espera a que el jugador suelte la tecla previa (la que
+     *     desencadeno el choque) para no consumirla como input.
+     *   - Luego espera nueva pulsacion:
+     *       Q                  -> restart = false (salir).
+     *       cualquier otra     -> restart = true  (reiniciar).
+     *   - Espera a que la suelte para evitar que el siguiente
+     *     PlayerGame la registre y mueva al jugador inmediatamente.
+     */
+    method void showGameOver() {
+        var char k;
+
+        do Output.moveCursor(11, 27);
+        do Output.printString("GAME OVER");
+        do Output.moveCursor(13, 18);
+        do Output.printString("Pulsa cualquier tecla (Q = salir)");
+
+        // Esperar a que se suelte la tecla del choque.
+        while (~(Keyboard.keyPressed() = 0)) {
+            // espera activa hasta soltado
+        }
+
+        // Esperar a que se pulse algo nuevo.
+        let k = 0;
+        while (k = 0) {
+            let k = Keyboard.keyPressed();
+        }
+
+        if (k = 81) {
+            let restart = false;
+        } else {
+            let restart = true;
+        }
+
+        // Esperar a que se suelte antes de devolver el control.
+        while (~(Keyboard.keyPressed() = 0)) {
+            // espera
         }
         return;
     }

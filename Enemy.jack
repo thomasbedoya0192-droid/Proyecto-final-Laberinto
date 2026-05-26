@@ -1,0 +1,483 @@
+/**
+ * Enemy.jack: Enemigo perseguidor con IA hibrida de tres modos:
+ *
+ *   MODO PERSECUCION (default):
+ *     Greedy hacia el jugador con sub-stepping (3 -> 2 -> 1 px).
+ *     Intenta eje preferido, luego secundario. Detecta atascos:
+ *     si la distancia Manhattan al jugador no ha disminuido en
+ *     STUCK_THRESHOLD frames consecutivos, dispara BFS.
+ *
+ *   MODO RODEO (legado, conservado como fallback rapido):
+ *     Cuando ambos ejes de persecucion fallan en un solo frame,
+ *     elige una direccion contraria y la mantiene 8 frames.
+ *     Si esto no resuelve el atasco, el contador STUCK terminara
+ *     activando BFS.
+ *
+ *   MODO PATH (BFS):
+ *     Al detectar atasco persistente, calcula la celda vecina
+ *     correcta hacia el jugador via BFS sobre la grilla 32x16.
+ *     Se mueve hacia el centro de esa celda durante PATH_FRAMES
+ *     frames, ignorando la posicion del jugador. Al terminar,
+ *     vuelve a MODO PERSECUCION y resetea el contador de atasco.
+ *
+ * Velocidad: 3 px/frame. sprite 12x12, celda 16x16 -> el bounding
+ * box por esquinas es seguro (3 + 12 < 16).
+ *
+ * Memoria reservada en el constructor:
+ *   - bfsQueue:   Array 512
+ *   - bfsVisited: Array 512
+ *   - bfsParent:  Array 512
+ * Se liberan en dispose().
+ */
+class Enemy {
+    field int x, y;
+    field Map gameMap;
+
+    // --- Estado de IA ---
+    field int lastDir;        // 1=up, 2=down, 3=left, 4=right (modo rodeo)
+    field int rodeoFrames;    // frames restantes en modo rodeo
+    field int lastDist;       // distancia Manhattan al jugador en frame previo
+    field int stuckFrames;    // frames consecutivos sin acercarnos
+    field int pathFrames;     // frames restantes en modo PATH
+    field int pathTargetX;    // pixel objetivo X (centro de celda objetivo)
+    field int pathTargetY;    // pixel objetivo Y
+
+    // --- Estructuras BFS (alocadas una vez) ---
+    field Array bfsQueue;
+    field Array bfsVisited;
+    field Array bfsParent;
+
+    constructor Enemy new(int initX, int initY, Map aMap) {
+        let x = initX;
+        let y = initY;
+        let gameMap = aMap;
+
+        let lastDir = 0;
+        let rodeoFrames = 0;
+        let lastDist = 32767;   // forzar comparacion grande la primera vez
+        let stuckFrames = 0;
+        let pathFrames = 0;
+
+        // 32 cols * 16 rows = 512 celdas
+        let bfsQueue = Array.new(512);
+        let bfsVisited = Array.new(512);
+        let bfsParent = Array.new(512);
+
+        do draw();
+        return this;
+    }
+
+    method void dispose() {
+        do bfsQueue.dispose();
+        do bfsVisited.dispose();
+        do bfsParent.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    method int getX() { return x; }
+    method int getY() { return y; }
+
+    /** Dibuja la cara enojada de 12x12 pixeles en (x, y). */
+    method void draw() {
+        do Screen.setColor(true);
+        do Screen.drawLine(x, y, x + 11, y);
+        do Screen.drawPixel(x, y + 1);
+        do Screen.drawPixel(x + 11, y + 1);
+        do Screen.drawPixel(x, y + 2);
+        do Screen.drawPixel(x + 2, y + 2);
+        do Screen.drawPixel(x + 9, y + 2);
+        do Screen.drawPixel(x + 11, y + 2);
+        do Screen.drawPixel(x, y + 3);
+        do Screen.drawPixel(x + 3, y + 3);
+        do Screen.drawPixel(x + 8, y + 3);
+        do Screen.drawPixel(x + 11, y + 3);
+        do Screen.drawPixel(x, y + 4);
+        do Screen.drawPixel(x + 4, y + 4);
+        do Screen.drawPixel(x + 7, y + 4);
+        do Screen.drawPixel(x + 11, y + 4);
+        do Screen.drawPixel(x, y + 5);
+        do Screen.drawPixel(x + 11, y + 5);
+        do Screen.drawPixel(x, y + 6);
+        do Screen.drawPixel(x + 11, y + 6);
+        do Screen.drawPixel(x, y + 7);
+        do Screen.drawPixel(x + 3, y + 7);
+        do Screen.drawPixel(x + 5, y + 7);
+        do Screen.drawPixel(x + 7, y + 7);
+        do Screen.drawPixel(x + 9, y + 7);
+        do Screen.drawPixel(x + 11, y + 7);
+        do Screen.drawPixel(x, y + 8);
+        do Screen.drawPixel(x + 2, y + 8);
+        do Screen.drawPixel(x + 4, y + 8);
+        do Screen.drawPixel(x + 6, y + 8);
+        do Screen.drawPixel(x + 8, y + 8);
+        do Screen.drawPixel(x + 11, y + 8);
+        do Screen.drawPixel(x, y + 9);
+        do Screen.drawPixel(x + 11, y + 9);
+        do Screen.drawPixel(x, y + 10);
+        do Screen.drawPixel(x + 11, y + 10);
+        do Screen.drawLine(x, y + 11, x + 11, y + 11);
+        return;
+    }
+
+    method void erase() {
+        do Screen.setColor(false);
+        do Screen.drawRectangle(x, y, x + 11, y + 11);
+        return;
+    }
+
+    /** Intenta mover (dx, dy). true si se realizo, false si choco. */
+    method boolean tryMove(int dx, int dy) {
+        var int newX, newY;
+        let newX = x + dx;
+        let newY = y + dy;
+        if (gameMap.collidesPixelRect(newX, newY, newX + 11, newY + 11)) {
+            return false;
+        }
+        do erase();
+        let x = newX;
+        let y = newY;
+        do draw();
+        return true;
+    }
+
+    /** Intenta direccion cardinal con sub-stepping (3 -> 2 -> 1). */
+    method boolean tryDirection(int dir) {
+        if (dir = 1) {
+            if (tryMove(0, -3)) { return true; }
+            if (tryMove(0, -2)) { return true; }
+            if (tryMove(0, -1)) { return true; }
+            return false;
+        }
+        if (dir = 2) {
+            if (tryMove(0, 3)) { return true; }
+            if (tryMove(0, 2)) { return true; }
+            if (tryMove(0, 1)) { return true; }
+            return false;
+        }
+        if (dir = 3) {
+            if (tryMove(-3, 0)) { return true; }
+            if (tryMove(-2, 0)) { return true; }
+            if (tryMove(-1, 0)) { return true; }
+            return false;
+        }
+        if (dir = 4) {
+            if (tryMove(3, 0)) { return true; }
+            if (tryMove(2, 0)) { return true; }
+            if (tryMove(1, 0)) { return true; }
+            return false;
+        }
+        return false;
+    }
+
+    method int opposite(int dir) {
+        if (dir = 1) { return 2; }
+        if (dir = 2) { return 1; }
+        if (dir = 3) { return 4; }
+        if (dir = 4) { return 3; }
+        return 0;
+    }
+
+    /** Valor absoluto inline. */
+    method int absVal(int v) {
+        if (v < 0) { return -v; }
+        return v;
+    }
+
+    /** Distancia Manhattan (pixeles) entre el enemigo y el punto target. */
+    method int manhattanTo(int tx, int ty) {
+        return absVal(tx - x) + absVal(ty - y);
+    }
+
+    /** Direccion primaria hacia un punto (eje de mayor diferencia). */
+    method int dirToward(int dx, int dy) {
+        var int absDx, absDy;
+        let absDx = absVal(dx);
+        let absDy = absVal(dy);
+        if (absDx > absDy) {
+            if (dx < 0) { return 3; }
+            return 4;
+        }
+        if (dy < 0) { return 1; }
+        return 2;
+    }
+
+    /** Direccion secundaria (el otro eje). */
+    method int dirSecondary(int dx, int dy) {
+        var int absDx, absDy;
+        let absDx = absVal(dx);
+        let absDy = absVal(dy);
+        if (absDx > absDy) {
+            if (dy < 0) { return 1; }
+            return 2;
+        }
+        if (dx < 0) { return 3; }
+        return 4;
+    }
+
+    /**
+     * BFS sobre la grilla 32x16 desde la celda actual hasta la celda
+     * destino. Reconstruye la PRIMERA celda del camino (vecino inmediato
+     * del enemigo) y guarda su centro en pixel en pathTargetX/Y.
+     *
+     * Devuelve true si encontro camino, false si no (jugador en celda
+     * muro u origen igual a destino).
+     *
+     * Implementacion: cola FIFO de indices de celda (row*32+col).
+     * visited[i] = 1 si visitada. parent[i] = indice de la celda desde
+     * la que se llego a i. Al alcanzar el destino, retrocedemos por
+     * parent[] hasta encontrar la celda cuyo padre es el origen: esa
+     * es nuestra siguiente celda objetivo.
+     *
+     * Vecinos: 4-conectividad. isWall(c,r) descarta muros.
+     */
+    method boolean computePathTo(int targetCellCol, int targetCellRow) {
+        var int startCol, startRow, startIdx, targetIdx;
+        var int qHead, qTail;
+        var int i, cur, curCol, curRow;
+        var int nCol, nRow, nIdx;
+        var int step;
+
+        // Celda actual del centro del sprite
+        let startCol = (x + 6) / 16;
+        let startRow = (y + 6) / 16;
+        let startIdx = (startRow * 32) + startCol;
+        let targetIdx = (targetCellRow * 32) + targetCellCol;
+
+        if (startIdx = targetIdx) { return false; }
+        if (gameMap.isWall(targetCellCol, targetCellRow)) { return false; }
+
+        // Resetear visited y parent
+        let i = 0;
+        while (i < 512) {
+            let bfsVisited[i] = 0;
+            let bfsParent[i] = -1;
+            let i = i + 1;
+        }
+
+        // Inicializar cola con el origen
+        let qHead = 0;
+        let qTail = 0;
+        let bfsQueue[qTail] = startIdx;
+        let qTail = qTail + 1;
+        let bfsVisited[startIdx] = 1;
+
+        // Bucle BFS principal
+        while (qHead < qTail) {
+            let cur = bfsQueue[qHead];
+            let qHead = qHead + 1;
+
+            if (cur = targetIdx) {
+                // Reconstruir: retroceder por parent[] hasta hijo directo
+                // del origen. Esa es la celda objetivo del siguiente paso.
+                let step = cur;
+                while (~(bfsParent[step] = startIdx)) {
+                    let step = bfsParent[step];
+                    if (step = -1) { return false; }   // proteccion
+                }
+                // step es la celda vecina al enemigo en el path optimo
+                let nCol = step - ((step / 32) * 32);
+                let nRow = step / 32;
+                // Centro de esa celda en pixel - 6 (porque sprite es 12)
+                let pathTargetX = (nCol * 16) + 2;
+                let pathTargetY = (nRow * 16) + 2;
+                return true;
+            }
+
+            let curCol = cur - ((cur / 32) * 32);
+            let curRow = cur / 32;
+
+            // Vecino arriba
+            let nRow = curRow - 1;
+            if (~(nRow < 0)) {
+                let nIdx = (nRow * 32) + curCol;
+                if (bfsVisited[nIdx] = 0) {
+                    if (~gameMap.isWall(curCol, nRow)) {
+                        let bfsVisited[nIdx] = 1;
+                        let bfsParent[nIdx] = cur;
+                        let bfsQueue[qTail] = nIdx;
+                        let qTail = qTail + 1;
+                    }
+                }
+            }
+
+            // Vecino abajo
+            let nRow = curRow + 1;
+            if (nRow < 16) {
+                let nIdx = (nRow * 32) + curCol;
+                if (bfsVisited[nIdx] = 0) {
+                    if (~gameMap.isWall(curCol, nRow)) {
+                        let bfsVisited[nIdx] = 1;
+                        let bfsParent[nIdx] = cur;
+                        let bfsQueue[qTail] = nIdx;
+                        let qTail = qTail + 1;
+                    }
+                }
+            }
+
+            // Vecino izquierda
+            let nCol = curCol - 1;
+            if (~(nCol < 0)) {
+                let nIdx = (curRow * 32) + nCol;
+                if (bfsVisited[nIdx] = 0) {
+                    if (~gameMap.isWall(nCol, curRow)) {
+                        let bfsVisited[nIdx] = 1;
+                        let bfsParent[nIdx] = cur;
+                        let bfsQueue[qTail] = nIdx;
+                        let qTail = qTail + 1;
+                    }
+                }
+            }
+
+            // Vecino derecha
+            let nCol = curCol + 1;
+            if (nCol < 32) {
+                let nIdx = (curRow * 32) + nCol;
+                if (bfsVisited[nIdx] = 0) {
+                    if (~gameMap.isWall(nCol, curRow)) {
+                        let bfsVisited[nIdx] = 1;
+                        let bfsParent[nIdx] = cur;
+                        let bfsQueue[qTail] = nIdx;
+                        let qTail = qTail + 1;
+                    }
+                }
+            }
+        }
+
+        // No se encontro camino (caso raro: jugador y enemigo desconectados)
+        return false;
+    }
+
+    /**
+     * Modo PATH: muevete hacia (pathTargetX, pathTargetY).
+     * Termina cuando la celda actual del sprite es la celda destino
+     * (mas robusto que comparar distancia en pixeles, porque el sprite
+     * puede no alinearse exactamente al centro con pasos de 3 px).
+     */
+    method void stepPath() {
+        var int dx, dy, primary, secondary;
+        var int curCol, curRow, targetCol, targetRow;
+
+        // Si llegamos a la celda objetivo, terminar modo PATH
+        let curCol = (x + 6) / 16;
+        let curRow = (y + 6) / 16;
+        let targetCol = (pathTargetX + 6) / 16;
+        let targetRow = (pathTargetY + 6) / 16;
+        if ((curCol = targetCol) & (curRow = targetRow)) {
+            let pathFrames = 0;
+            let lastDist = 32767;   // forzar reset de deteccion de atasco
+            return;
+        }
+
+        let dx = pathTargetX - x;
+        let dy = pathTargetY - y;
+        let primary = dirToward(dx, dy);
+        let secondary = dirSecondary(dx, dy);
+
+        if (tryDirection(primary)) { return; }
+        if (tryDirection(secondary)) { return; }
+        // No deberia ocurrir si el path es valido; salir del modo PATH.
+        let pathFrames = 0;
+        let lastDist = 32767;
+        return;
+    }
+
+    /**
+     * Logica principal de un frame de IA.
+     *
+     * Prioridades:
+     *   1. Si pathFrames > 0, ejecutar stepPath() (modo BFS activo).
+     *   2. Si rodeoFrames > 0, ejecutar paso de rodeo.
+     *   3. Modo persecucion greedy normal.
+     *
+     * Detecta atascos en modo persecucion: si la distancia Manhattan
+     * al jugador no disminuye durante STUCK_THRESHOLD frames, dispara
+     * BFS hacia la celda del jugador.
+     */
+    method void chase(int targetX, int targetY) {
+        var int dx, dy, dist;
+        var int primary, secondary;
+        var int tryDir;
+        var int playerCol, playerRow;
+
+        // --- MODO PATH ---
+        if (pathFrames > 0) {
+            let pathFrames = pathFrames - 1;
+            do stepPath();
+            // Si pathFrames acaba de llegar a 0 (expiro por timeout),
+            // resetear deteccion de atasco para no dispararla otra vez
+            // inmediatamente al volver a persecucion.
+            if (pathFrames = 0) {
+                let lastDist = 32767;
+            }
+            return;
+        }
+
+        // --- MODO RODEO ---
+        if (rodeoFrames > 0) {
+            let rodeoFrames = rodeoFrames - 1;
+            if (tryDirection(lastDir)) { return; }
+            // Si lastDir se bloqueo, descartar modo rodeo y caer a persecucion.
+            let rodeoFrames = 0;
+            let lastDir = 0;
+        }
+
+        // --- MODO PERSECUCION ---
+        let dx = targetX - x;
+        let dy = targetY - y;
+        let dist = absVal(dx) + absVal(dy);
+
+        // Deteccion de atasco
+        if (dist < lastDist) {
+            let stuckFrames = 0;
+        } else {
+            let stuckFrames = stuckFrames + 1;
+        }
+        let lastDist = dist;
+
+        if (stuckFrames > 30) {
+            // ATASCO: disparar BFS hacia la celda del jugador
+            let playerCol = (targetX + 6) / 16;
+            let playerRow = (targetY + 6) / 16;
+            if (computePathTo(playerCol, playerRow)) {
+                let pathFrames = 12;
+                let stuckFrames = 0;
+                let lastDist = 32767;  // resetear al volver a persecucion
+                do stepPath();
+                return;
+            }
+            // Si BFS fallo, resetear contador para no quedar bloqueado aqui
+            let stuckFrames = 0;
+        }
+
+        let primary = dirToward(dx, dy);
+        let secondary = dirSecondary(dx, dy);
+
+        if (tryDirection(primary)) { return; }
+        if (tryDirection(secondary)) { return; }
+
+        // Ambos ejes hacia el jugador fallaron: entrar a modo rodeo corto
+        let tryDir = opposite(primary);
+        if (tryDirection(tryDir)) {
+            let lastDir = tryDir;
+            let rodeoFrames = 8;
+            return;
+        }
+        let tryDir = opposite(secondary);
+        if (tryDirection(tryDir)) {
+            let lastDir = tryDir;
+            let rodeoFrames = 8;
+            return;
+        }
+        return;
+    }
+
+    /** Detecta solape de los dos rectangulos 12x12. */
+    method boolean collidesWith(int px, int py) {
+        if ((px + 11) < x) { return false; }
+        if (px > (x + 11)) { return false; }
+        if ((py + 11) < y) { return false; }
+        if (py > (y + 11)) { return false; }
+        return true;
+    }
+}

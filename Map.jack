@@ -116,7 +116,11 @@ class Map {
         // Fila 8
         do setWall(2, 8);   do setWall(3, 8);   do setWall(4, 8);   do setWall(5, 8);   do setWall(6, 8);
         do setWall(8, 8);   do setWall(9, 8);   do setWall(10, 8);  do setWall(11, 8);  do setWall(12, 8);
-        do setWall(13, 8);  do setWall(14, 8);  do setWall(15, 8);  do setWall(16, 8);  do setWall(17, 8);
+        do setWall(13, 8);  do setWall(14, 8);  do setWall(15, 8);
+        // Col 16, fila 8: hueco abierto a proposito para conectar el corredor
+        // superior con el inferior. Hueco de 1 celda (16x16 px) es suficiente
+        // para que pasen los sprites de 12x12.
+        do setWall(17, 8);
         do setWall(18, 8);  do setWall(19, 8);  do setWall(20, 8);  do setWall(21, 8);  do setWall(22, 8);
         do setWall(25, 8);
         do setWall(27, 8);  do setWall(28, 8);  do setWall(29, 8);  do setWall(30, 8);
@@ -130,7 +134,11 @@ class Map {
         do setWall(1, 10);  do setWall(2, 10);  do setWall(3, 10);  do setWall(4, 10);  do setWall(5, 10);
         do setWall(7, 10);  do setWall(8, 10);  do setWall(9, 10);  do setWall(10, 10); do setWall(11, 10);
         do setWall(13, 10);
-        do setWall(15, 10); do setWall(16, 10); do setWall(17, 10); do setWall(18, 10); do setWall(19, 10);
+        do setWall(15, 10); do setWall(16, 10);
+        // Col 17, fila 10: hueco abierto a proposito para conectar el nicho
+        // de (17, 11) con el corredor superior. Asi la IA del enemigo puede
+        // escapar verticalmente del callejon en lugar de quedar atrapada.
+        do setWall(18, 10); do setWall(19, 10);
         do setWall(22, 10);
         do setWall(27, 10); do setWall(28, 10); do setWall(29, 10);
 
