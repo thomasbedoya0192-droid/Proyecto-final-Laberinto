@@ -1,0 +1,91 @@
+/**
+ * PlayerGame.jack: Game loop principal. Lee el teclado de forma continua
+ * y mueve al jugador 1 pixel por iteracion mientras la tecla este
+ * presionada. La logica de colisiones la encapsula Player a traves de
+ * Map, asi que aqui solo despachamos direcciones.
+ *
+ * Controles:
+ *   Flecha arriba   (130 en algunas teclas, 131 segun la convencion Jack)
+ *   En el emulador estandar de Nand2Tetris:
+ *     131 = Up, 133 = Down, 130 = Left, 132 = Right, 81 = 'Q' (salir)
+ */
+class PlayerGame {
+    field Map gameMap;
+    field Player player;
+    field int direction;   // 0=nada, 1=up, 2=down, 3=left, 4=right
+
+    /** Crea el juego: mapa + jugador en posicion inicial segura. */
+    constructor PlayerGame new() {
+        let gameMap = Map.new();
+        do Screen.clearScreen();
+        do gameMap.draw();
+
+        // Spawn en celda (1,1) interior: pixel (18, 18).
+        // Sprite 12x12 -> ocupa pixeles (18..29, 18..29), todos dentro
+        // de la celda (1,1) que es camino libre.
+        let player = Player.new(18, 18, gameMap);
+
+        let direction = 0;
+        return this;
+    }
+
+    /** Libera la memoria de juego, jugador y mapa. */
+    method void dispose() {
+        do player.dispose();
+        do gameMap.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    /** Aplica el movimiento correspondiente a la direccion actual. */
+    method void movePlayer() {
+        if (direction = 1) { do player.moveUp(); }
+        if (direction = 2) { do player.moveDown(); }
+        if (direction = 3) { do player.moveLeft(); }
+        if (direction = 4) { do player.moveRight(); }
+        // Pequeña pausa para que el movimiento sea perceptible
+        // (con 1px por frame, sin pausa seria demasiado rapido).
+        do Sys.wait(15);
+        return;
+    }
+
+    /**
+     * Bucle principal: lee teclado y mueve al jugador. Sale al pulsar Q.
+     *
+     * Patron clasico Nand2Tetris:
+     *   - Mientras no haya tecla, intenta moverse en la ultima direccion
+     *     (con direction=0 no hace nada, simplemente espera).
+     *   - Al detectar tecla, actualiza direction.
+     *   - Mientras la tecla siga presionada, sigue moviendose.
+     *   - Al soltar, vuelve a direction=0.
+     */
+    method void run() {
+        var char key;
+        var boolean exit;
+        let exit = false;
+        let key = 0;
+
+        while (~exit) {
+            // Esperar a que se presione una tecla (con movimiento continuo
+            // mientras direction != 0 desde el ciclo anterior).
+            while (key = 0) {
+                let key = Keyboard.keyPressed();
+                do movePlayer();
+            }
+
+            if (key = 81)  { let exit = true; }       // Q -> salir
+            if (key = 131) { let direction = 1; }     // flecha arriba
+            if (key = 133) { let direction = 2; }     // flecha abajo
+            if (key = 130) { let direction = 3; }     // flecha izquierda
+            if (key = 132) { let direction = 4; }     // flecha derecha
+
+            // Mientras la tecla siga presionada, mover continuamente.
+            while (~(key = 0)) {
+                let key = Keyboard.keyPressed();
+                do movePlayer();
+            }
+            let direction = 0;
+        }
+        return;
+    }
+}

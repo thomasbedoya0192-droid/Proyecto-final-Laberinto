@@ -1,67 +1,194 @@
 /**
- * Clase Map: Gestiona la matriz del laberinto, el renderizado 
- * y las colisiones.
+ * Map.jack: Gestiona la matriz del laberinto, su renderizado en pantalla
+ * y la consulta de colisiones a nivel de celda.
+ *
+ * Modelo:
+ *   - Grilla logica de 32 columnas x 16 filas (512 celdas).
+ *   - Cada celda mide 16x16 pixeles -> ocupa toda la pantalla 512x256.
+ *   - 0 = camino libre, 1 = muro.
+ *
+ * Layout:
+ *   - Marco perimetral cerrado (filas 0/15 y columnas 0/31 son muro).
+ *   - Muros internos formando pasillos sinuosos al estilo del PDF.
  */
 class Map {
-    field Array grid;     // Nuestro arreglo 1D que simulará un 2D
-    field int cols, rows; // 32 y 16
-    field int cellSize;   // 16 pixeles
+    field Array grid;        // arreglo 1D de 512 enteros (row*32 + col)
+    field int cols, rows;    // 32 y 16
+    field int cellSize;      // 16 pixeles por celda
 
-    /** Construye un nuevo mapa y define los muros iniciales */
+    /** Construye el mapa con todos los muros definidos. */
     constructor Map new() {
-        var int i;
-
         let cols = 32;
         let rows = 16;
         let cellSize = 16;
-        let grid = Array.new(512); // 32 * 16 = 512
-        
-        let i = 0;
-        // Primero, llenamos todo de caminos vacíos (0)
-        while (i < 512) {
-            let grid[i] = 0;
-            let i = i + 1;
-        }
+        let grid = Array.new(512);
 
-        // Ahora, vamos a crear un muro alrededor de los bordes para probar
-        // Muros superior e inferior
-        let i = 0;
-        while (i < cols) {
-            let grid[i] = 1;               // Fila 0 (arriba)
-            let grid[480 + i] = 1;         // Fila 15 (abajo) -> 15 * 32 = 480
-            let i = i + 1;
-        }
-
-        // Muros laterales (izquierdo y derecho)
-        let i = 0;
-        while (i < rows) {
-            let grid[i * cols] = 1;            // Columna 0 (izquierda)
-            let grid[(i * cols) + 31] = 1;     // Columna 31 (derecha)
-            let i = i + 1;
-        }
+        do clearGrid();
+        do buildBorders();
+        do buildInnerWalls();
 
         return this;
     }
 
-    /** Dibuja el laberinto en la pantalla */
+    /** Inicializa toda la grilla a 0 (camino libre). */
+    method void clearGrid() {
+        var int i;
+        let i = 0;
+        while (i < 512) {
+            let grid[i] = 0;
+            let i = i + 1;
+        }
+        return;
+    }
+
+    /** Construye el marco perimetral cerrado. */
+    method void buildBorders() {
+        var int i;
+
+        // Bordes horizontales: fila 0 (arriba) y fila 15 (abajo).
+        let i = 0;
+        while (i < cols) {
+            let grid[i] = 1;            // fila 0
+            let grid[480 + i] = 1;      // fila 15 (15 * 32 = 480)
+            let i = i + 1;
+        }
+
+        // Bordes verticales: columna 0 (izquierda) y columna 31 (derecha).
+        let i = 0;
+        while (i < rows) {
+            let grid[i * cols] = 1;            // columna 0
+            let grid[(i * cols) + 31] = 1;     // columna 31
+            let i = i + 1;
+        }
+        return;
+    }
+
+    /**
+     * Construye los muros internos. Cada llamada a setWall(c, r) marca una
+     * celda como muro. El layout sigue el espiritu del laberinto del PDF
+     * adaptado a 32x16: pasillos de 1 celda de ancho, callejones sin
+     * salida, y multiples caminos para evitar atrapar al jugador.
+     */
+    method void buildInnerWalls() {
+        // Fila 2: bloques de 4 muros con huecos
+        do setWall(2, 2);   do setWall(3, 2);   do setWall(4, 2);   do setWall(5, 2);
+        do setWall(7, 2);
+        do setWall(9, 2);   do setWall(10, 2);  do setWall(11, 2);  do setWall(12, 2);  do setWall(13, 2);
+        do setWall(15, 2);
+        do setWall(17, 2);  do setWall(18, 2);  do setWall(19, 2);  do setWall(20, 2);  do setWall(21, 2);
+        do setWall(23, 2);
+        do setWall(25, 2);  do setWall(26, 2);  do setWall(27, 2);  do setWall(28, 2);  do setWall(29, 2);
+
+        // Fila 3
+        do setWall(2, 3);
+        do setWall(9, 3);
+        do setWall(21, 3);
+        do setWall(29, 3);
+
+        // Fila 4
+        do setWall(2, 4);
+        do setWall(4, 4);   do setWall(5, 4);   do setWall(6, 4);   do setWall(7, 4);   do setWall(8, 4);   do setWall(9, 4);
+        do setWall(11, 4);  do setWall(12, 4);  do setWall(13, 4);  do setWall(14, 4);  do setWall(15, 4);
+        do setWall(16, 4);  do setWall(17, 4);  do setWall(18, 4);  do setWall(19, 4);
+        do setWall(21, 4);  do setWall(22, 4);  do setWall(23, 4);  do setWall(24, 4);  do setWall(25, 4);
+        do setWall(26, 4);  do setWall(27, 4);
+        do setWall(29, 4);
+
+        // Fila 5
+        do setWall(4, 5);
+        do setWall(15, 5);
+        do setWall(27, 5);
+
+        // Fila 6
+        do setWall(1, 6);   do setWall(2, 6);
+        do setWall(4, 6);
+        do setWall(6, 6);   do setWall(7, 6);   do setWall(8, 6);   do setWall(9, 6);   do setWall(10, 6);
+        do setWall(11, 6);  do setWall(12, 6);  do setWall(13, 6);
+        do setWall(15, 6);
+        do setWall(17, 6);  do setWall(18, 6);  do setWall(19, 6);  do setWall(20, 6);  do setWall(21, 6);
+        do setWall(22, 6);  do setWall(23, 6);  do setWall(24, 6);  do setWall(25, 6);
+        do setWall(27, 6);  do setWall(28, 6);  do setWall(29, 6);
+
+        // Fila 7
+        do setWall(6, 7);
+        do setWall(25, 7);
+
+        // Fila 8
+        do setWall(2, 8);   do setWall(3, 8);   do setWall(4, 8);   do setWall(5, 8);   do setWall(6, 8);
+        do setWall(8, 8);   do setWall(9, 8);   do setWall(10, 8);  do setWall(11, 8);  do setWall(12, 8);
+        do setWall(13, 8);  do setWall(14, 8);  do setWall(15, 8);  do setWall(16, 8);  do setWall(17, 8);
+        do setWall(18, 8);  do setWall(19, 8);  do setWall(20, 8);  do setWall(21, 8);  do setWall(22, 8);
+        do setWall(25, 8);
+        do setWall(27, 8);  do setWall(28, 8);  do setWall(29, 8);  do setWall(30, 8);
+
+        // Fila 9
+        do setWall(13, 9);
+        do setWall(22, 9);
+        do setWall(24, 9);  do setWall(25, 9);
+
+        // Fila 10
+        do setWall(1, 10);  do setWall(2, 10);  do setWall(3, 10);  do setWall(4, 10);  do setWall(5, 10);
+        do setWall(7, 10);  do setWall(8, 10);  do setWall(9, 10);  do setWall(10, 10); do setWall(11, 10);
+        do setWall(13, 10);
+        do setWall(15, 10); do setWall(16, 10); do setWall(17, 10); do setWall(18, 10); do setWall(19, 10);
+        do setWall(22, 10);
+        do setWall(27, 10); do setWall(28, 10); do setWall(29, 10);
+
+        // Fila 11
+        do setWall(7, 11);
+        do setWall(13, 11);
+        do setWall(15, 11);
+        do setWall(19, 11);
+        do setWall(21, 11); do setWall(22, 11); do setWall(23, 11); do setWall(24, 11); do setWall(25, 11);
+        do setWall(29, 11);
+
+        // Fila 12
+        do setWall(2, 12);  do setWall(3, 12);  do setWall(4, 12);  do setWall(5, 12);  do setWall(6, 12);
+        do setWall(7, 12);
+        do setWall(9, 12);  do setWall(10, 12); do setWall(11, 12); do setWall(12, 12); do setWall(13, 12);
+        do setWall(15, 12);
+        do setWall(17, 12);
+        do setWall(19, 12);
+        do setWall(27, 12);
+
+        // Fila 13
+        do setWall(2, 13);
+        do setWall(15, 13);
+        do setWall(17, 13);
+        do setWall(21, 13); do setWall(22, 13); do setWall(23, 13); do setWall(24, 13);
+        do setWall(25, 13); do setWall(26, 13); do setWall(27, 13);
+        do setWall(29, 13);
+
+        // Fila 14
+        do setWall(4, 14);  do setWall(5, 14);  do setWall(6, 14);  do setWall(7, 14);  do setWall(8, 14);
+        do setWall(9, 14);  do setWall(10, 14); do setWall(11, 14); do setWall(12, 14); do setWall(13, 14);
+        do setWall(17, 14); do setWall(18, 14); do setWall(19, 14);
+
+        return;
+    }
+
+    /** Marca la celda (col, row) como muro. */
+    method void setWall(int col, int row) {
+        let grid[(row * cols) + col] = 1;
+        return;
+    }
+
+    /** Dibuja todo el laberinto en pantalla. */
     method void draw() {
         var int row, col, index;
         var int x, y;
 
+        do Screen.setColor(true);
         let row = 0;
         let index = 0;
 
-        // Recorremos las filas
         while (row < rows) {
             let col = 0;
-            // Recorremos las columnas
             while (col < cols) {
-                if (grid[index] = 1) { // Si hay un muro (1)
+                if (grid[index] = 1) {
                     let x = col * cellSize;
                     let y = row * cellSize;
-                    do Screen.setColor(true); // true = pixel negro
-                    // Dibujamos un cuadrado de 16x16
-                    do Screen.drawRectangle(x, y, x + (cellSize - 1), y + (cellSize - 1));
+                    do Screen.drawRectangle(x, y, x + 15, y + 15);
                 }
                 let col = col + 1;
                 let index = index + 1;
@@ -71,25 +198,48 @@ class Map {
         return;
     }
 
-    /** Verifica si una coordenada específica es un muro */
+    /**
+     * Consulta si la celda (col, row) es muro.
+     * Coordenadas fuera de la grilla se tratan como muro (proteccion
+     * defensiva contra accesos fuera de rango).
+     */
     method boolean isWall(int col, int row) {
         var int index;
-        
-        // Prevención de errores: si intentan salir de la pantalla
-        if ((col < 0) | (col > 31) | (row < 0) | (row > 15)) {
-            return true;
-        }
+
+        if (col < 0)      { return true; }
+        if (col > 31)     { return true; }
+        if (row < 0)      { return true; }
+        if (row > 15)     { return true; }
 
         let index = (row * cols) + col;
-        
-        if (grid[index] = 1) {
-            return true;
-        }
-        
+        if (grid[index] = 1) { return true; }
         return false;
     }
 
-    /** Libera la memoria cuando el juego termine */
+    /**
+     * Comprueba si un rectangulo en coordenadas de pixel colisiona con
+     * algun muro. Se evaluan las 4 esquinas del rectangulo (bounding box)
+     * mapeadas a celdas mediante division entera por 16.
+     *
+     * Devuelve true si HAY colision (alguna esquina cae en muro) y false
+     * si las 4 esquinas estan en camino libre.
+     */
+    method boolean collidesPixelRect(int xLeft, int yTop, int xRight, int yBottom) {
+        var int cLeft, cRight, rTop, rBottom;
+
+        let cLeft = xLeft / 16;
+        let cRight = xRight / 16;
+        let rTop = yTop / 16;
+        let rBottom = yBottom / 16;
+
+        if (isWall(cLeft, rTop))     { return true; }
+        if (isWall(cRight, rTop))    { return true; }
+        if (isWall(cLeft, rBottom))  { return true; }
+        if (isWall(cRight, rBottom)) { return true; }
+        return false;
+    }
+
+    /** Libera la memoria. */
     method void dispose() {
         do grid.dispose();
         do Memory.deAlloc(this);
