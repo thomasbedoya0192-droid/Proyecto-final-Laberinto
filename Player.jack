@@ -143,8 +143,12 @@ class Player {
         return;
     }
 
-    method void moveUp()    { do tryMove(0, -1); return; }
-    method void moveDown()  { do tryMove(0, 1);  return; }
-    method void moveLeft()  { do tryMove(-1, 0); return; }
-    method void moveRight() { do tryMove(1, 0);  return; }
+    // Velocidad: 3 pixeles por frame. Como el sprite es 12x12 y los
+    // muros son celdas de 16x16, un salto de 3 nunca puede atravesar
+    // un muro (12 + 3 < 16) -> la deteccion por bounding box sigue
+    // siendo segura.
+    method void moveUp()    { do tryMove(0, -3); return; }
+    method void moveDown()  { do tryMove(0, 3);  return; }
+    method void moveLeft()  { do tryMove(-3, 0); return; }
+    method void moveRight() { do tryMove(3, 0);  return; }
 }
