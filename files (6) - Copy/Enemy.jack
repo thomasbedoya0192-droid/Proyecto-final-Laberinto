@@ -1,0 +1,242 @@
+/**
+ * Enemy.jack: Enemigo perseguidor basado en BFS.
+ *
+ * Movimiento celda a celda: cada vez que chase() es llamado,
+ * el enemigo calcula via BFS la celda vecina mas cercana al
+ * jugador y salta directamente a su centro. No hay movimiento
+ * de pixels intermedios, por lo que nunca puede quedar trabado
+ * entre celdas ni chocar con bordes de muros.
+ *
+ * El BFS solo se recalcula cuando el jugador cambia de celda,
+ * para no sobrecargar el emulador.
+ */
+class Enemy {
+    field int x, y;
+    field Map gameMap;
+
+    field int lastPlayerCol, lastPlayerRow;
+    field int nextCol, nextRow;
+    field boolean hasNext;
+
+    field Array bfsQueue;
+    field Array bfsVisited;
+    field Array bfsParent;
+
+    constructor Enemy new(int initX, int initY, Map aMap) {
+        let x = initX;
+        let y = initY;
+        let gameMap = aMap;
+        let lastPlayerCol = -1;
+        let lastPlayerRow = -1;
+        let hasNext = false;
+        let bfsQueue   = Array.new(512);
+        let bfsVisited = Array.new(512);
+        let bfsParent  = Array.new(512);
+        do draw();
+        return this;
+    }
+
+    method void dispose() {
+        do bfsQueue.dispose();
+        do bfsVisited.dispose();
+        do bfsParent.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    method int getX() { return x; }
+    method int getY() { return y; }
+
+    method void draw() {
+        do Screen.setColor(true);
+        do Screen.drawLine(x, y, x + 11, y);
+        do Screen.drawPixel(x, y + 1);
+        do Screen.drawPixel(x + 11, y + 1);
+        do Screen.drawPixel(x, y + 2);
+        do Screen.drawPixel(x + 2, y + 2);
+        do Screen.drawPixel(x + 9, y + 2);
+        do Screen.drawPixel(x + 11, y + 2);
+        do Screen.drawPixel(x, y + 3);
+        do Screen.drawPixel(x + 3, y + 3);
+        do Screen.drawPixel(x + 8, y + 3);
+        do Screen.drawPixel(x + 11, y + 3);
+        do Screen.drawPixel(x, y + 4);
+        do Screen.drawPixel(x + 4, y + 4);
+        do Screen.drawPixel(x + 7, y + 4);
+        do Screen.drawPixel(x + 11, y + 4);
+        do Screen.drawPixel(x, y + 5);
+        do Screen.drawPixel(x + 11, y + 5);
+        do Screen.drawPixel(x, y + 6);
+        do Screen.drawPixel(x + 11, y + 6);
+        do Screen.drawPixel(x, y + 7);
+        do Screen.drawPixel(x + 3, y + 7);
+        do Screen.drawPixel(x + 5, y + 7);
+        do Screen.drawPixel(x + 7, y + 7);
+        do Screen.drawPixel(x + 9, y + 7);
+        do Screen.drawPixel(x + 11, y + 7);
+        do Screen.drawPixel(x, y + 8);
+        do Screen.drawPixel(x + 2, y + 8);
+        do Screen.drawPixel(x + 4, y + 8);
+        do Screen.drawPixel(x + 6, y + 8);
+        do Screen.drawPixel(x + 8, y + 8);
+        do Screen.drawPixel(x + 11, y + 8);
+        do Screen.drawPixel(x, y + 9);
+        do Screen.drawPixel(x + 11, y + 9);
+        do Screen.drawPixel(x, y + 10);
+        do Screen.drawPixel(x + 11, y + 10);
+        do Screen.drawLine(x, y + 11, x + 11, y + 11);
+        return;
+    }
+
+    method void erase() {
+        do Screen.setColor(false);
+        do Screen.drawRectangle(x, y, x + 11, y + 11);
+        return;
+    }
+
+    /**
+     * BFS desde la celda actual hasta (goalCol, goalRow).
+     * Guarda en nextCol/nextRow la primera celda del camino optimo.
+     * Devuelve true si encontro camino.
+     */
+    method boolean computeNextStep(int goalCol, int goalRow) {
+        var int startCol, startRow, startIdx, goalIdx;
+        var int qHead, qTail, i;
+        var int cur, curCol, curRow;
+        var int nIdx, nCol, nRow;
+        var int step;
+
+        let startCol = (x + 6) / 16;
+        let startRow = (y + 6) / 16;
+        let startIdx = (startRow * 32) + startCol;
+        let goalIdx  = (goalRow  * 32) + goalCol;
+
+        if (startIdx = goalIdx)                    { return false; }
+        if (gameMap.isWall(goalCol, goalRow))      { return false; }
+        if (gameMap.isWall(startCol, startRow))    { return false; }
+
+        let i = 0;
+        while (i < 512) {
+            let bfsVisited[i] = 0;
+            let bfsParent[i]  = -1;
+            let i = i + 1;
+        }
+
+        let qHead = 0;
+        let qTail = 0;
+        let bfsQueue[qTail] = startIdx;
+        let qTail = qTail + 1;
+        let bfsVisited[startIdx] = 1;
+
+        while (qHead < qTail) {
+            let cur = bfsQueue[qHead];
+            let qHead = qHead + 1;
+
+            if (cur = goalIdx) {
+                let step = cur;
+                while (~(bfsParent[step] = startIdx)) {
+                    let step = bfsParent[step];
+                    if (step = -1) { return false; }
+                }
+                let nextCol = step - ((step / 32) * 32);
+                let nextRow = step / 32;
+                return true;
+            }
+
+            let curCol = cur - ((cur / 32) * 32);
+            let curRow = cur / 32;
+
+            let nRow = curRow - 1;
+            if (~(nRow < 0)) {
+                let nIdx = (nRow * 32) + curCol;
+                if (bfsVisited[nIdx] = 0) {
+                    if (~gameMap.isWall(curCol, nRow)) {
+                        let bfsVisited[nIdx] = 1;
+                        let bfsParent[nIdx]  = cur;
+                        let bfsQueue[qTail]  = nIdx;
+                        let qTail = qTail + 1;
+                    }
+                }
+            }
+            let nRow = curRow + 1;
+            if (nRow < 16) {
+                let nIdx = (nRow * 32) + curCol;
+                if (bfsVisited[nIdx] = 0) {
+                    if (~gameMap.isWall(curCol, nRow)) {
+                        let bfsVisited[nIdx] = 1;
+                        let bfsParent[nIdx]  = cur;
+                        let bfsQueue[qTail]  = nIdx;
+                        let qTail = qTail + 1;
+                    }
+                }
+            }
+            let nCol = curCol - 1;
+            if (~(nCol < 0)) {
+                let nIdx = (curRow * 32) + nCol;
+                if (bfsVisited[nIdx] = 0) {
+                    if (~gameMap.isWall(nCol, curRow)) {
+                        let bfsVisited[nIdx] = 1;
+                        let bfsParent[nIdx]  = cur;
+                        let bfsQueue[qTail]  = nIdx;
+                        let qTail = qTail + 1;
+                    }
+                }
+            }
+            let nCol = curCol + 1;
+            if (nCol < 32) {
+                let nIdx = (curRow * 32) + nCol;
+                if (bfsVisited[nIdx] = 0) {
+                    if (~gameMap.isWall(nCol, curRow)) {
+                        let bfsVisited[nIdx] = 1;
+                        let bfsParent[nIdx]  = cur;
+                        let bfsQueue[qTail]  = nIdx;
+                        let qTail = qTail + 1;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Logica principal. Llama al BFS solo cuando el jugador cambia
+     * de celda, luego teleporta al enemigo al centro de la celda
+     * siguiente del camino optimo.
+     */
+    method void chase(int targetX, int targetY) {
+        var int playerCol, playerRow;
+        var boolean playerMoved;
+
+        let playerCol  = (targetX + 6) / 16;
+        let playerRow  = (targetY + 6) / 16;
+        let playerMoved = (~(playerCol = lastPlayerCol)) | (~(playerRow = lastPlayerRow));
+
+        if (playerMoved | (~hasNext)) {
+            let lastPlayerCol = playerCol;
+            let lastPlayerRow = playerRow;
+            if (computeNextStep(playerCol, playerRow)) {
+                let hasNext = true;
+            }
+        }
+
+        if (hasNext) {
+            // Mover directamente al centro de la celda siguiente
+            do erase();
+            let x = (nextCol * 16) + 2;
+            let y = (nextRow * 16) + 2;
+            do draw();
+            // La celda siguiente se convirtio en la actual,
+            // forzar recalculo en el proximo frame.
+            let hasNext = false;
+        }
+        return;
+    }
+
+    method boolean collidesWith(int px, int py) {
+        if ((px + 11) < x)  { return false; }
+        if (px > (x + 11))  { return false; }
+        if ((py + 11) < y)  { return false; }
+        if (py > (y + 11))  { return false; }
+        return true;
+    }
+}

@@ -1,0 +1,72 @@
+/**
+ * Goal.jack: Meta del juego, representada como una bandera triangular
+ * de 12x12 pixeles. El jugador gana al solapar su bounding box con la
+ * meta.
+ *
+ * Diseno del sprite (12x12):
+ *   - Asta vertical en columna 2, todas las filas.
+ *   - Bandera triangular en filas 1-4, decreciente hacia la derecha
+ *     (parece una banderola al viento).
+ *   - Base ancha en fila 11 (cols 1-3) que la "ancla" al suelo.
+ */
+class Goal {
+    field int x, y;   // posicion en pixeles (esquina sup-izq del bounding box)
+
+    /** Crea la meta en (initX, initY). Dibuja inmediatamente. */
+    constructor Goal new(int initX, int initY) {
+        let x = initX;
+        let y = initY;
+        do draw();
+        return this;
+    }
+
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    method int getX() { return x; }
+    method int getY() { return y; }
+
+    /** Dibuja la bandera 12x12 pixel a pixel. */
+    method void draw() {
+        do Screen.setColor(true);
+
+        // Asta: columna 2, todas las filas
+        do Screen.drawLine(x + 2, y, x + 2, y + 11);
+
+        // Bandera triangular (filas 1-4):
+        //   Fila 1: cols 3..9 (mas larga, parte superior de la bandera)
+        do Screen.drawLine(x + 3, y + 1, x + 9, y + 1);
+        //   Fila 2: cols 3..8
+        do Screen.drawLine(x + 3, y + 2, x + 8, y + 2);
+        //   Fila 3: cols 3..6
+        do Screen.drawLine(x + 3, y + 3, x + 6, y + 3);
+        //   Fila 4: cols 3..4 (punta inferior del triangulo)
+        do Screen.drawLine(x + 3, y + 4, x + 4, y + 4);
+
+        // Base ancha (fila 11, cols 1..3) para anclar visualmente
+        do Screen.drawLine(x + 1, y + 11, x + 3, y + 11);
+
+        return;
+    }
+
+    /** Borra el bounding box completo (12x12). */
+    method void erase() {
+        do Screen.setColor(false);
+        do Screen.drawRectangle(x, y, x + 11, y + 11);
+        return;
+    }
+
+    /**
+     * Detecta solape de bounding boxes 12x12 entre la meta y otro
+     * sprite (jugador) cuya esquina sup-izq es (px, py).
+     */
+    method boolean collidesWith(int px, int py) {
+        if ((px + 11) < x) { return false; }
+        if (px > (x + 11)) { return false; }
+        if ((py + 11) < y) { return false; }
+        if (py > (y + 11)) { return false; }
+        return true;
+    }
+}

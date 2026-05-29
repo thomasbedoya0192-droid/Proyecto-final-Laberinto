@@ -1,0 +1,1955 @@
+function Map.new 0
+    push constant 4
+    call Memory.alloc 1
+    pop pointer 0
+    push constant 32
+    pop this 1
+    push constant 16
+    pop this 2
+    push constant 16
+    pop this 3
+    push constant 512
+    call Array.new 1
+    pop this 0
+    push pointer 0
+    call Map.clearGrid 1
+    pop temp 0
+    push pointer 0
+    call Map.buildBorders 1
+    pop temp 0
+    push pointer 0
+    call Map.buildInnerWalls 1
+    pop temp 0
+    push pointer 0
+    return
+function Map.clearGrid 1
+    push argument 0
+    pop pointer 0
+    push constant 0
+    pop local 0
+label Map_0
+    push local 0
+    push constant 512
+    lt
+    not
+    if-goto Map_1
+    push local 0
+    push this 0
+    add
+    push constant 0
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push local 0
+    push constant 1
+    add
+    pop local 0
+    goto Map_0
+label Map_1
+    push constant 0
+    return
+function Map.buildBorders 1
+    push argument 0
+    pop pointer 0
+    push constant 0
+    pop local 0
+label Map_2
+    push local 0
+    push this 1
+    lt
+    not
+    if-goto Map_3
+    push local 0
+    push this 0
+    add
+    push constant 1
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push constant 480
+    push local 0
+    add
+    push this 0
+    add
+    push constant 1
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push local 0
+    push constant 1
+    add
+    pop local 0
+    goto Map_2
+label Map_3
+    push constant 0
+    pop local 0
+label Map_4
+    push local 0
+    push this 2
+    lt
+    not
+    if-goto Map_5
+    push local 0
+    push this 1
+    call Math.multiply 2
+    push this 0
+    add
+    push constant 1
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push local 0
+    push this 1
+    call Math.multiply 2
+    push constant 31
+    add
+    push this 0
+    add
+    push constant 1
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push local 0
+    push constant 1
+    add
+    pop local 0
+    goto Map_4
+label Map_5
+    push constant 0
+    return
+function Map.buildInnerWalls 0
+    push argument 0
+    pop pointer 0
+    push pointer 0
+    push constant 2
+    push constant 2
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 3
+    push constant 2
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 4
+    push constant 2
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 5
+    push constant 2
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 7
+    push constant 2
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 9
+    push constant 2
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 10
+    push constant 2
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 11
+    push constant 2
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 12
+    push constant 2
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 13
+    push constant 2
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 15
+    push constant 2
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 17
+    push constant 2
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 18
+    push constant 2
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 19
+    push constant 2
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 20
+    push constant 2
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 21
+    push constant 2
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 23
+    push constant 2
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 25
+    push constant 2
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 26
+    push constant 2
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 27
+    push constant 2
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 28
+    push constant 2
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 29
+    push constant 2
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 2
+    push constant 3
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 9
+    push constant 3
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 21
+    push constant 3
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 29
+    push constant 3
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 2
+    push constant 4
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 4
+    push constant 4
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 5
+    push constant 4
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 6
+    push constant 4
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 7
+    push constant 4
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 8
+    push constant 4
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 9
+    push constant 4
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 11
+    push constant 4
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 12
+    push constant 4
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 13
+    push constant 4
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 14
+    push constant 4
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 15
+    push constant 4
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 16
+    push constant 4
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 17
+    push constant 4
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 18
+    push constant 4
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 19
+    push constant 4
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 21
+    push constant 4
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 22
+    push constant 4
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 23
+    push constant 4
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 24
+    push constant 4
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 25
+    push constant 4
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 26
+    push constant 4
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 27
+    push constant 4
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 29
+    push constant 4
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 4
+    push constant 5
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 15
+    push constant 5
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 27
+    push constant 5
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 1
+    push constant 6
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 2
+    push constant 6
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 4
+    push constant 6
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 6
+    push constant 6
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 7
+    push constant 6
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 8
+    push constant 6
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 9
+    push constant 6
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 10
+    push constant 6
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 11
+    push constant 6
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 12
+    push constant 6
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 13
+    push constant 6
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 15
+    push constant 6
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 17
+    push constant 6
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 18
+    push constant 6
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 19
+    push constant 6
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 20
+    push constant 6
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 21
+    push constant 6
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 22
+    push constant 6
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 23
+    push constant 6
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 24
+    push constant 6
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 25
+    push constant 6
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 27
+    push constant 6
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 28
+    push constant 6
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 29
+    push constant 6
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 6
+    push constant 7
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 25
+    push constant 7
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 2
+    push constant 8
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 3
+    push constant 8
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 4
+    push constant 8
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 5
+    push constant 8
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 6
+    push constant 8
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 8
+    push constant 8
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 9
+    push constant 8
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 10
+    push constant 8
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 11
+    push constant 8
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 12
+    push constant 8
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 13
+    push constant 8
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 14
+    push constant 8
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 15
+    push constant 8
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 17
+    push constant 8
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 18
+    push constant 8
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 19
+    push constant 8
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 20
+    push constant 8
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 21
+    push constant 8
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 22
+    push constant 8
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 25
+    push constant 8
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 27
+    push constant 8
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 28
+    push constant 8
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 29
+    push constant 8
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 30
+    push constant 8
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 13
+    push constant 9
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 22
+    push constant 9
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 24
+    push constant 9
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 25
+    push constant 9
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 1
+    push constant 10
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 2
+    push constant 10
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 3
+    push constant 10
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 4
+    push constant 10
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 5
+    push constant 10
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 7
+    push constant 10
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 8
+    push constant 10
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 9
+    push constant 10
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 10
+    push constant 10
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 11
+    push constant 10
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 13
+    push constant 10
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 15
+    push constant 10
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 16
+    push constant 10
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 18
+    push constant 10
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 19
+    push constant 10
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 22
+    push constant 10
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 27
+    push constant 10
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 28
+    push constant 10
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 29
+    push constant 10
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 7
+    push constant 11
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 13
+    push constant 11
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 15
+    push constant 11
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 19
+    push constant 11
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 21
+    push constant 11
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 22
+    push constant 11
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 23
+    push constant 11
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 24
+    push constant 11
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 25
+    push constant 11
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 29
+    push constant 11
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 2
+    push constant 12
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 3
+    push constant 12
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 4
+    push constant 12
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 5
+    push constant 12
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 6
+    push constant 12
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 7
+    push constant 12
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 9
+    push constant 12
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 10
+    push constant 12
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 11
+    push constant 12
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 12
+    push constant 12
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 13
+    push constant 12
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 15
+    push constant 12
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 17
+    push constant 12
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 19
+    push constant 12
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 27
+    push constant 12
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 2
+    push constant 13
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 15
+    push constant 13
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 17
+    push constant 13
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 21
+    push constant 13
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 22
+    push constant 13
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 23
+    push constant 13
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 24
+    push constant 13
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 25
+    push constant 13
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 26
+    push constant 13
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 27
+    push constant 13
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 29
+    push constant 13
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 4
+    push constant 14
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 5
+    push constant 14
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 6
+    push constant 14
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 7
+    push constant 14
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 8
+    push constant 14
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 9
+    push constant 14
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 10
+    push constant 14
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 11
+    push constant 14
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 12
+    push constant 14
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 13
+    push constant 14
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 17
+    push constant 14
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 18
+    push constant 14
+    call Map.setWall 3
+    pop temp 0
+    push pointer 0
+    push constant 19
+    push constant 14
+    call Map.setWall 3
+    pop temp 0
+    push constant 0
+    return
+function Map.setWall 0
+    push argument 0
+    pop pointer 0
+    push argument 2
+    push this 1
+    call Math.multiply 2
+    push argument 1
+    add
+    push this 0
+    add
+    push constant 1
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push constant 0
+    return
+function Map.draw 5
+    push argument 0
+    pop pointer 0
+    push constant 1
+    neg
+    call Screen.setColor 1
+    pop temp 0
+    push constant 0
+    pop local 0
+    push constant 0
+    pop local 2
+label Map_6
+    push local 0
+    push this 2
+    lt
+    not
+    if-goto Map_7
+    push constant 0
+    pop local 1
+label Map_8
+    push local 1
+    push this 1
+    lt
+    not
+    if-goto Map_9
+    push local 2
+    push this 0
+    add
+    pop pointer 1
+    push that 0
+    push constant 1
+    eq
+    not
+    if-goto Map_11
+    push local 1
+    push this 3
+    call Math.multiply 2
+    pop local 3
+    push local 0
+    push this 3
+    call Math.multiply 2
+    pop local 4
+    push local 3
+    push local 4
+    push local 3
+    push constant 15
+    add
+    push local 4
+    push constant 15
+    add
+    call Screen.drawRectangle 4
+    pop temp 0
+    goto Map_10
+label Map_11
+label Map_10
+    push local 1
+    push constant 1
+    add
+    pop local 1
+    push local 2
+    push constant 1
+    add
+    pop local 2
+    goto Map_8
+label Map_9
+    push local 0
+    push constant 1
+    add
+    pop local 0
+    goto Map_6
+label Map_7
+    push constant 0
+    return
+function Map.isWall 1
+    push argument 0
+    pop pointer 0
+    push argument 1
+    push constant 0
+    lt
+    not
+    if-goto Map_13
+    push constant 1
+    neg
+    return
+    goto Map_12
+label Map_13
+label Map_12
+    push argument 1
+    push constant 31
+    gt
+    not
+    if-goto Map_15
+    push constant 1
+    neg
+    return
+    goto Map_14
+label Map_15
+label Map_14
+    push argument 2
+    push constant 0
+    lt
+    not
+    if-goto Map_17
+    push constant 1
+    neg
+    return
+    goto Map_16
+label Map_17
+label Map_16
+    push argument 2
+    push constant 15
+    gt
+    not
+    if-goto Map_19
+    push constant 1
+    neg
+    return
+    goto Map_18
+label Map_19
+label Map_18
+    push argument 2
+    push this 1
+    call Math.multiply 2
+    push argument 1
+    add
+    pop local 0
+    push local 0
+    push this 0
+    add
+    pop pointer 1
+    push that 0
+    push constant 1
+    eq
+    not
+    if-goto Map_21
+    push constant 1
+    neg
+    return
+    goto Map_20
+label Map_21
+label Map_20
+    push constant 0
+    return
+function Map.collidesPixelRect 4
+    push argument 0
+    pop pointer 0
+    push argument 1
+    push constant 16
+    call Math.divide 2
+    pop local 0
+    push argument 3
+    push constant 16
+    call Math.divide 2
+    pop local 1
+    push argument 2
+    push constant 16
+    call Math.divide 2
+    pop local 2
+    push argument 4
+    push constant 16
+    call Math.divide 2
+    pop local 3
+    push pointer 0
+    push local 0
+    push local 2
+    call Map.isWall 3
+    not
+    if-goto Map_23
+    push constant 1
+    neg
+    return
+    goto Map_22
+label Map_23
+label Map_22
+    push pointer 0
+    push local 1
+    push local 2
+    call Map.isWall 3
+    not
+    if-goto Map_25
+    push constant 1
+    neg
+    return
+    goto Map_24
+label Map_25
+label Map_24
+    push pointer 0
+    push local 0
+    push local 3
+    call Map.isWall 3
+    not
+    if-goto Map_27
+    push constant 1
+    neg
+    return
+    goto Map_26
+label Map_27
+label Map_26
+    push pointer 0
+    push local 1
+    push local 3
+    call Map.isWall 3
+    not
+    if-goto Map_29
+    push constant 1
+    neg
+    return
+    goto Map_28
+label Map_29
+label Map_28
+    push constant 0
+    return
+function Map.randomFreeCell 3
+    push argument 0
+    pop pointer 0
+    push constant 0
+    pop local 0
+label Map_30
+    push local 0
+    push constant 200
+    lt
+    not
+    if-goto Map_31
+    push argument 1
+    push constant 30
+    call Random.nextRange 2
+    push constant 1
+    add
+    pop local 1
+    push argument 1
+    push constant 14
+    call Random.nextRange 2
+    push constant 1
+    add
+    pop local 2
+    push pointer 0
+    push local 1
+    push local 2
+    call Map.isWall 3
+    not
+    not
+    if-goto Map_33
+    push constant 0
+    push argument 2
+    add
+    push local 1
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push constant 1
+    push argument 2
+    add
+    push local 2
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push constant 0
+    return
+    goto Map_32
+label Map_33
+label Map_32
+    push local 0
+    push constant 1
+    add
+    pop local 0
+    goto Map_30
+label Map_31
+    push constant 1
+    pop local 2
+label Map_34
+    push local 2
+    push constant 15
+    lt
+    not
+    if-goto Map_35
+    push constant 1
+    pop local 1
+label Map_36
+    push local 1
+    push constant 31
+    lt
+    not
+    if-goto Map_37
+    push pointer 0
+    push local 1
+    push local 2
+    call Map.isWall 3
+    not
+    not
+    if-goto Map_39
+    push constant 0
+    push argument 2
+    add
+    push local 1
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push constant 1
+    push argument 2
+    add
+    push local 2
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push constant 0
+    return
+    goto Map_38
+label Map_39
+label Map_38
+    push local 1
+    push constant 1
+    add
+    pop local 1
+    goto Map_36
+label Map_37
+    push local 2
+    push constant 1
+    add
+    pop local 2
+    goto Map_34
+label Map_35
+    push constant 0
+    push argument 2
+    add
+    push constant 1
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push constant 1
+    push argument 2
+    add
+    push constant 1
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push constant 0
+    return
+function Map.randomFreeCellAtDistance 8
+    push argument 0
+    pop pointer 0
+    push constant 0
+    pop local 0
+label Map_40
+    push local 0
+    push constant 400
+    lt
+    not
+    if-goto Map_41
+    push argument 1
+    push constant 30
+    call Random.nextRange 2
+    push constant 1
+    add
+    pop local 1
+    push argument 1
+    push constant 14
+    call Random.nextRange 2
+    push constant 1
+    add
+    pop local 2
+    push pointer 0
+    push local 1
+    push local 2
+    call Map.isWall 3
+    not
+    not
+    if-goto Map_43
+    push local 1
+    push argument 6
+    eq
+    push local 2
+    push argument 7
+    eq
+    and
+    not
+    not
+    if-goto Map_45
+    push pointer 0
+    push local 1
+    push local 2
+    push argument 2
+    push argument 3
+    call Map.manhattanCells 5
+    pop local 3
+    push local 3
+    push argument 4
+    lt
+    not
+    push local 3
+    push argument 5
+    gt
+    not
+    and
+    not
+    if-goto Map_47
+    push constant 0
+    push argument 8
+    add
+    push local 1
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push constant 1
+    push argument 8
+    add
+    push local 2
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push constant 0
+    return
+    goto Map_46
+label Map_47
+label Map_46
+    goto Map_44
+label Map_45
+label Map_44
+    goto Map_42
+label Map_43
+label Map_42
+    push local 0
+    push constant 1
+    add
+    pop local 0
+    goto Map_40
+label Map_41
+    push constant 1
+    pop local 4
+    push constant 1
+    pop local 5
+    push constant 32767
+    pop local 6
+    push constant 1
+    pop local 2
+label Map_48
+    push local 2
+    push constant 15
+    lt
+    not
+    if-goto Map_49
+    push constant 1
+    pop local 1
+label Map_50
+    push local 1
+    push constant 31
+    lt
+    not
+    if-goto Map_51
+    push pointer 0
+    push local 1
+    push local 2
+    call Map.isWall 3
+    not
+    not
+    if-goto Map_53
+    push local 1
+    push argument 6
+    eq
+    push local 2
+    push argument 7
+    eq
+    and
+    not
+    not
+    if-goto Map_55
+    push pointer 0
+    push local 1
+    push local 2
+    push argument 2
+    push argument 3
+    call Map.manhattanCells 5
+    pop local 3
+    push local 3
+    push argument 4
+    lt
+    not
+    if-goto Map_57
+    push argument 4
+    push local 3
+    sub
+    pop local 7
+    goto Map_56
+label Map_57
+    push local 3
+    push argument 5
+    gt
+    not
+    if-goto Map_59
+    push local 3
+    push argument 5
+    sub
+    pop local 7
+    goto Map_58
+label Map_59
+    push constant 0
+    pop local 7
+label Map_58
+label Map_56
+    push local 7
+    push local 6
+    lt
+    not
+    if-goto Map_61
+    push local 7
+    pop local 6
+    push local 1
+    pop local 4
+    push local 2
+    pop local 5
+    goto Map_60
+label Map_61
+label Map_60
+    goto Map_54
+label Map_55
+label Map_54
+    goto Map_52
+label Map_53
+label Map_52
+    push local 1
+    push constant 1
+    add
+    pop local 1
+    goto Map_50
+label Map_51
+    push local 2
+    push constant 1
+    add
+    pop local 2
+    goto Map_48
+label Map_49
+    push constant 0
+    push argument 8
+    add
+    push local 4
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push constant 1
+    push argument 8
+    add
+    push local 5
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push constant 0
+    return
+function Map.manhattanCells 2
+    push argument 0
+    pop pointer 0
+    push argument 1
+    push argument 3
+    sub
+    pop local 0
+    push local 0
+    push constant 0
+    lt
+    not
+    if-goto Map_63
+    push local 0
+    neg
+    pop local 0
+    goto Map_62
+label Map_63
+label Map_62
+    push argument 2
+    push argument 4
+    sub
+    pop local 1
+    push local 1
+    push constant 0
+    lt
+    not
+    if-goto Map_65
+    push local 1
+    neg
+    pop local 1
+    goto Map_64
+label Map_65
+label Map_64
+    push local 0
+    push local 1
+    add
+    return
+function Map.nearestFreeCell 3
+    push argument 0
+    pop pointer 0
+    push pointer 0
+    push argument 1
+    push argument 2
+    call Map.isWall 3
+    not
+    not
+    if-goto Map_67
+    push argument 1
+    push constant 0
+    gt
+    push argument 1
+    push constant 31
+    lt
+    and
+    push argument 2
+    push constant 0
+    gt
+    and
+    push argument 2
+    push constant 15
+    lt
+    and
+    not
+    if-goto Map_69
+    push constant 0
+    push argument 3
+    add
+    push argument 1
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push constant 1
+    push argument 3
+    add
+    push argument 2
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push constant 0
+    return
+    goto Map_68
+label Map_69
+label Map_68
+    goto Map_66
+label Map_67
+label Map_66
+    push constant 1
+    pop local 0
+label Map_70
+    push local 0
+    push constant 32
+    lt
+    not
+    if-goto Map_71
+    push argument 1
+    push local 0
+    sub
+    pop local 1
+label Map_72
+    push local 1
+    push argument 1
+    push local 0
+    add
+    gt
+    not
+    not
+    if-goto Map_73
+    push argument 2
+    push local 0
+    sub
+    pop local 2
+    push local 1
+    push constant 0
+    gt
+    push local 1
+    push constant 31
+    lt
+    and
+    push local 2
+    push constant 0
+    gt
+    and
+    push local 2
+    push constant 15
+    lt
+    and
+    not
+    if-goto Map_75
+    push pointer 0
+    push local 1
+    push local 2
+    call Map.isWall 3
+    not
+    not
+    if-goto Map_77
+    push constant 0
+    push argument 3
+    add
+    push local 1
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push constant 1
+    push argument 3
+    add
+    push local 2
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push constant 0
+    return
+    goto Map_76
+label Map_77
+label Map_76
+    goto Map_74
+label Map_75
+label Map_74
+    push argument 2
+    push local 0
+    add
+    pop local 2
+    push local 1
+    push constant 0
+    gt
+    push local 1
+    push constant 31
+    lt
+    and
+    push local 2
+    push constant 0
+    gt
+    and
+    push local 2
+    push constant 15
+    lt
+    and
+    not
+    if-goto Map_79
+    push pointer 0
+    push local 1
+    push local 2
+    call Map.isWall 3
+    not
+    not
+    if-goto Map_81
+    push constant 0
+    push argument 3
+    add
+    push local 1
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push constant 1
+    push argument 3
+    add
+    push local 2
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push constant 0
+    return
+    goto Map_80
+label Map_81
+label Map_80
+    goto Map_78
+label Map_79
+label Map_78
+    push local 1
+    push constant 1
+    add
+    pop local 1
+    goto Map_72
+label Map_73
+    push argument 2
+    push local 0
+    sub
+    push constant 1
+    add
+    pop local 2
+label Map_82
+    push local 2
+    push argument 2
+    push local 0
+    add
+    lt
+    not
+    if-goto Map_83
+    push argument 1
+    push local 0
+    sub
+    pop local 1
+    push local 1
+    push constant 0
+    gt
+    push local 1
+    push constant 31
+    lt
+    and
+    push local 2
+    push constant 0
+    gt
+    and
+    push local 2
+    push constant 15
+    lt
+    and
+    not
+    if-goto Map_85
+    push pointer 0
+    push local 1
+    push local 2
+    call Map.isWall 3
+    not
+    not
+    if-goto Map_87
+    push constant 0
+    push argument 3
+    add
+    push local 1
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push constant 1
+    push argument 3
+    add
+    push local 2
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push constant 0
+    return
+    goto Map_86
+label Map_87
+label Map_86
+    goto Map_84
+label Map_85
+label Map_84
+    push argument 1
+    push local 0
+    add
+    pop local 1
+    push local 1
+    push constant 0
+    gt
+    push local 1
+    push constant 31
+    lt
+    and
+    push local 2
+    push constant 0
+    gt
+    and
+    push local 2
+    push constant 15
+    lt
+    and
+    not
+    if-goto Map_89
+    push pointer 0
+    push local 1
+    push local 2
+    call Map.isWall 3
+    not
+    not
+    if-goto Map_91
+    push constant 0
+    push argument 3
+    add
+    push local 1
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push constant 1
+    push argument 3
+    add
+    push local 2
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push constant 0
+    return
+    goto Map_90
+label Map_91
+label Map_90
+    goto Map_88
+label Map_89
+label Map_88
+    push local 2
+    push constant 1
+    add
+    pop local 2
+    goto Map_82
+label Map_83
+    push local 0
+    push constant 1
+    add
+    pop local 0
+    goto Map_70
+label Map_71
+    push constant 0
+    push argument 3
+    add
+    push constant 1
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push constant 1
+    push argument 3
+    add
+    push constant 1
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push constant 0
+    return
+function Map.dispose 0
+    push argument 0
+    pop pointer 0
+    push this 0
+    call Array.dispose 1
+    pop temp 0
+    push pointer 0
+    call Memory.deAlloc 1
+    pop temp 0
+    push constant 0
+    return

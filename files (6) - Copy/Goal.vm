@@ -1,0 +1,194 @@
+function Goal.new 0
+    push constant 2
+    call Memory.alloc 1
+    pop pointer 0
+    push argument 0
+    pop this 0
+    push argument 1
+    pop this 1
+    push pointer 0
+    call Goal.draw 1
+    pop temp 0
+    push pointer 0
+    return
+function Goal.dispose 0
+    push argument 0
+    pop pointer 0
+    push pointer 0
+    call Memory.deAlloc 1
+    pop temp 0
+    push constant 0
+    return
+function Goal.getX 0
+    push argument 0
+    pop pointer 0
+    push this 0
+    return
+function Goal.getY 0
+    push argument 0
+    pop pointer 0
+    push this 1
+    return
+function Goal.draw 0
+    push argument 0
+    pop pointer 0
+    push constant 1
+    neg
+    call Screen.setColor 1
+    pop temp 0
+    push this 0
+    push constant 2
+    add
+    push this 1
+    push this 0
+    push constant 2
+    add
+    push this 1
+    push constant 11
+    add
+    call Screen.drawLine 4
+    pop temp 0
+    push this 0
+    push constant 3
+    add
+    push this 1
+    push constant 1
+    add
+    push this 0
+    push constant 9
+    add
+    push this 1
+    push constant 1
+    add
+    call Screen.drawLine 4
+    pop temp 0
+    push this 0
+    push constant 3
+    add
+    push this 1
+    push constant 2
+    add
+    push this 0
+    push constant 8
+    add
+    push this 1
+    push constant 2
+    add
+    call Screen.drawLine 4
+    pop temp 0
+    push this 0
+    push constant 3
+    add
+    push this 1
+    push constant 3
+    add
+    push this 0
+    push constant 6
+    add
+    push this 1
+    push constant 3
+    add
+    call Screen.drawLine 4
+    pop temp 0
+    push this 0
+    push constant 3
+    add
+    push this 1
+    push constant 4
+    add
+    push this 0
+    push constant 4
+    add
+    push this 1
+    push constant 4
+    add
+    call Screen.drawLine 4
+    pop temp 0
+    push this 0
+    push constant 1
+    add
+    push this 1
+    push constant 11
+    add
+    push this 0
+    push constant 3
+    add
+    push this 1
+    push constant 11
+    add
+    call Screen.drawLine 4
+    pop temp 0
+    push constant 0
+    return
+function Goal.erase 0
+    push argument 0
+    pop pointer 0
+    push constant 0
+    call Screen.setColor 1
+    pop temp 0
+    push this 0
+    push this 1
+    push this 0
+    push constant 11
+    add
+    push this 1
+    push constant 11
+    add
+    call Screen.drawRectangle 4
+    pop temp 0
+    push constant 0
+    return
+function Goal.collidesWith 0
+    push argument 0
+    pop pointer 0
+    push argument 1
+    push constant 11
+    add
+    push this 0
+    lt
+    not
+    if-goto Goal_1
+    push constant 0
+    return
+    goto Goal_0
+label Goal_1
+label Goal_0
+    push argument 1
+    push this 0
+    push constant 11
+    add
+    gt
+    not
+    if-goto Goal_3
+    push constant 0
+    return
+    goto Goal_2
+label Goal_3
+label Goal_2
+    push argument 2
+    push constant 11
+    add
+    push this 1
+    lt
+    not
+    if-goto Goal_5
+    push constant 0
+    return
+    goto Goal_4
+label Goal_5
+label Goal_4
+    push argument 2
+    push this 1
+    push constant 11
+    add
+    gt
+    not
+    if-goto Goal_7
+    push constant 0
+    return
+    goto Goal_6
+label Goal_7
+label Goal_6
+    push constant 1
+    neg
+    return

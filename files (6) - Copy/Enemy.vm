@@ -1,0 +1,965 @@
+function Enemy.new 0
+    push constant 11
+    call Memory.alloc 1
+    pop pointer 0
+    push argument 0
+    pop this 0
+    push argument 1
+    pop this 1
+    push argument 2
+    pop this 2
+    push constant 1
+    neg
+    pop this 3
+    push constant 1
+    neg
+    pop this 4
+    push constant 0
+    pop this 7
+    push constant 512
+    call Array.new 1
+    pop this 8
+    push constant 512
+    call Array.new 1
+    pop this 9
+    push constant 512
+    call Array.new 1
+    pop this 10
+    push pointer 0
+    call Enemy.draw 1
+    pop temp 0
+    push pointer 0
+    return
+function Enemy.dispose 0
+    push argument 0
+    pop pointer 0
+    push this 8
+    call Array.dispose 1
+    pop temp 0
+    push this 9
+    call Array.dispose 1
+    pop temp 0
+    push this 10
+    call Array.dispose 1
+    pop temp 0
+    push pointer 0
+    call Memory.deAlloc 1
+    pop temp 0
+    push constant 0
+    return
+function Enemy.getX 0
+    push argument 0
+    pop pointer 0
+    push this 0
+    return
+function Enemy.getY 0
+    push argument 0
+    pop pointer 0
+    push this 1
+    return
+function Enemy.draw 0
+    push argument 0
+    pop pointer 0
+    push constant 1
+    neg
+    call Screen.setColor 1
+    pop temp 0
+    push this 0
+    push this 1
+    push this 0
+    push constant 11
+    add
+    push this 1
+    call Screen.drawLine 4
+    pop temp 0
+    push this 0
+    push this 1
+    push constant 1
+    add
+    call Screen.drawPixel 2
+    pop temp 0
+    push this 0
+    push constant 11
+    add
+    push this 1
+    push constant 1
+    add
+    call Screen.drawPixel 2
+    pop temp 0
+    push this 0
+    push this 1
+    push constant 2
+    add
+    call Screen.drawPixel 2
+    pop temp 0
+    push this 0
+    push constant 2
+    add
+    push this 1
+    push constant 2
+    add
+    call Screen.drawPixel 2
+    pop temp 0
+    push this 0
+    push constant 9
+    add
+    push this 1
+    push constant 2
+    add
+    call Screen.drawPixel 2
+    pop temp 0
+    push this 0
+    push constant 11
+    add
+    push this 1
+    push constant 2
+    add
+    call Screen.drawPixel 2
+    pop temp 0
+    push this 0
+    push this 1
+    push constant 3
+    add
+    call Screen.drawPixel 2
+    pop temp 0
+    push this 0
+    push constant 3
+    add
+    push this 1
+    push constant 3
+    add
+    call Screen.drawPixel 2
+    pop temp 0
+    push this 0
+    push constant 8
+    add
+    push this 1
+    push constant 3
+    add
+    call Screen.drawPixel 2
+    pop temp 0
+    push this 0
+    push constant 11
+    add
+    push this 1
+    push constant 3
+    add
+    call Screen.drawPixel 2
+    pop temp 0
+    push this 0
+    push this 1
+    push constant 4
+    add
+    call Screen.drawPixel 2
+    pop temp 0
+    push this 0
+    push constant 4
+    add
+    push this 1
+    push constant 4
+    add
+    call Screen.drawPixel 2
+    pop temp 0
+    push this 0
+    push constant 7
+    add
+    push this 1
+    push constant 4
+    add
+    call Screen.drawPixel 2
+    pop temp 0
+    push this 0
+    push constant 11
+    add
+    push this 1
+    push constant 4
+    add
+    call Screen.drawPixel 2
+    pop temp 0
+    push this 0
+    push this 1
+    push constant 5
+    add
+    call Screen.drawPixel 2
+    pop temp 0
+    push this 0
+    push constant 11
+    add
+    push this 1
+    push constant 5
+    add
+    call Screen.drawPixel 2
+    pop temp 0
+    push this 0
+    push this 1
+    push constant 6
+    add
+    call Screen.drawPixel 2
+    pop temp 0
+    push this 0
+    push constant 11
+    add
+    push this 1
+    push constant 6
+    add
+    call Screen.drawPixel 2
+    pop temp 0
+    push this 0
+    push this 1
+    push constant 7
+    add
+    call Screen.drawPixel 2
+    pop temp 0
+    push this 0
+    push constant 3
+    add
+    push this 1
+    push constant 7
+    add
+    call Screen.drawPixel 2
+    pop temp 0
+    push this 0
+    push constant 5
+    add
+    push this 1
+    push constant 7
+    add
+    call Screen.drawPixel 2
+    pop temp 0
+    push this 0
+    push constant 7
+    add
+    push this 1
+    push constant 7
+    add
+    call Screen.drawPixel 2
+    pop temp 0
+    push this 0
+    push constant 9
+    add
+    push this 1
+    push constant 7
+    add
+    call Screen.drawPixel 2
+    pop temp 0
+    push this 0
+    push constant 11
+    add
+    push this 1
+    push constant 7
+    add
+    call Screen.drawPixel 2
+    pop temp 0
+    push this 0
+    push this 1
+    push constant 8
+    add
+    call Screen.drawPixel 2
+    pop temp 0
+    push this 0
+    push constant 2
+    add
+    push this 1
+    push constant 8
+    add
+    call Screen.drawPixel 2
+    pop temp 0
+    push this 0
+    push constant 4
+    add
+    push this 1
+    push constant 8
+    add
+    call Screen.drawPixel 2
+    pop temp 0
+    push this 0
+    push constant 6
+    add
+    push this 1
+    push constant 8
+    add
+    call Screen.drawPixel 2
+    pop temp 0
+    push this 0
+    push constant 8
+    add
+    push this 1
+    push constant 8
+    add
+    call Screen.drawPixel 2
+    pop temp 0
+    push this 0
+    push constant 11
+    add
+    push this 1
+    push constant 8
+    add
+    call Screen.drawPixel 2
+    pop temp 0
+    push this 0
+    push this 1
+    push constant 9
+    add
+    call Screen.drawPixel 2
+    pop temp 0
+    push this 0
+    push constant 11
+    add
+    push this 1
+    push constant 9
+    add
+    call Screen.drawPixel 2
+    pop temp 0
+    push this 0
+    push this 1
+    push constant 10
+    add
+    call Screen.drawPixel 2
+    pop temp 0
+    push this 0
+    push constant 11
+    add
+    push this 1
+    push constant 10
+    add
+    call Screen.drawPixel 2
+    pop temp 0
+    push this 0
+    push this 1
+    push constant 11
+    add
+    push this 0
+    push constant 11
+    add
+    push this 1
+    push constant 11
+    add
+    call Screen.drawLine 4
+    pop temp 0
+    push constant 0
+    return
+function Enemy.erase 0
+    push argument 0
+    pop pointer 0
+    push constant 0
+    call Screen.setColor 1
+    pop temp 0
+    push this 0
+    push this 1
+    push this 0
+    push constant 11
+    add
+    push this 1
+    push constant 11
+    add
+    call Screen.drawRectangle 4
+    pop temp 0
+    push constant 0
+    return
+function Enemy.computeNextStep 14
+    push argument 0
+    pop pointer 0
+    push this 0
+    push constant 6
+    add
+    push constant 16
+    call Math.divide 2
+    pop local 0
+    push this 1
+    push constant 6
+    add
+    push constant 16
+    call Math.divide 2
+    pop local 1
+    push local 1
+    push constant 32
+    call Math.multiply 2
+    push local 0
+    add
+    pop local 2
+    push argument 2
+    push constant 32
+    call Math.multiply 2
+    push argument 1
+    add
+    pop local 3
+    push local 2
+    push local 3
+    eq
+    not
+    if-goto Enemy_1
+    push constant 0
+    return
+    goto Enemy_0
+label Enemy_1
+label Enemy_0
+    push this 2
+    push argument 1
+    push argument 2
+    call Map.isWall 3
+    not
+    if-goto Enemy_3
+    push constant 0
+    return
+    goto Enemy_2
+label Enemy_3
+label Enemy_2
+    push this 2
+    push local 0
+    push local 1
+    call Map.isWall 3
+    not
+    if-goto Enemy_5
+    push constant 0
+    return
+    goto Enemy_4
+label Enemy_5
+label Enemy_4
+    push constant 0
+    pop local 6
+label Enemy_6
+    push local 6
+    push constant 512
+    lt
+    not
+    if-goto Enemy_7
+    push local 6
+    push this 9
+    add
+    push constant 0
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push local 6
+    push this 10
+    add
+    push constant 1
+    neg
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push local 6
+    push constant 1
+    add
+    pop local 6
+    goto Enemy_6
+label Enemy_7
+    push constant 0
+    pop local 4
+    push constant 0
+    pop local 5
+    push local 5
+    push this 8
+    add
+    push local 2
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push local 5
+    push constant 1
+    add
+    pop local 5
+    push local 2
+    push this 9
+    add
+    push constant 1
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+label Enemy_8
+    push local 4
+    push local 5
+    lt
+    not
+    if-goto Enemy_9
+    push local 4
+    push this 8
+    add
+    pop pointer 1
+    push that 0
+    pop local 7
+    push local 4
+    push constant 1
+    add
+    pop local 4
+    push local 7
+    push local 3
+    eq
+    not
+    if-goto Enemy_11
+    push local 7
+    pop local 13
+label Enemy_12
+    push local 13
+    push this 10
+    add
+    pop pointer 1
+    push that 0
+    push local 2
+    eq
+    not
+    not
+    if-goto Enemy_13
+    push local 13
+    push this 10
+    add
+    pop pointer 1
+    push that 0
+    pop local 13
+    push local 13
+    push constant 1
+    neg
+    eq
+    not
+    if-goto Enemy_15
+    push constant 0
+    return
+    goto Enemy_14
+label Enemy_15
+label Enemy_14
+    goto Enemy_12
+label Enemy_13
+    push local 13
+    push local 13
+    push constant 32
+    call Math.divide 2
+    push constant 32
+    call Math.multiply 2
+    sub
+    pop this 5
+    push local 13
+    push constant 32
+    call Math.divide 2
+    pop this 6
+    push constant 1
+    neg
+    return
+    goto Enemy_10
+label Enemy_11
+label Enemy_10
+    push local 7
+    push local 7
+    push constant 32
+    call Math.divide 2
+    push constant 32
+    call Math.multiply 2
+    sub
+    pop local 8
+    push local 7
+    push constant 32
+    call Math.divide 2
+    pop local 9
+    push local 9
+    push constant 1
+    sub
+    pop local 12
+    push local 12
+    push constant 0
+    lt
+    not
+    not
+    if-goto Enemy_17
+    push local 12
+    push constant 32
+    call Math.multiply 2
+    push local 8
+    add
+    pop local 10
+    push local 10
+    push this 9
+    add
+    pop pointer 1
+    push that 0
+    push constant 0
+    eq
+    not
+    if-goto Enemy_19
+    push this 2
+    push local 8
+    push local 12
+    call Map.isWall 3
+    not
+    not
+    if-goto Enemy_21
+    push local 10
+    push this 9
+    add
+    push constant 1
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push local 10
+    push this 10
+    add
+    push local 7
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push local 5
+    push this 8
+    add
+    push local 10
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push local 5
+    push constant 1
+    add
+    pop local 5
+    goto Enemy_20
+label Enemy_21
+label Enemy_20
+    goto Enemy_18
+label Enemy_19
+label Enemy_18
+    goto Enemy_16
+label Enemy_17
+label Enemy_16
+    push local 9
+    push constant 1
+    add
+    pop local 12
+    push local 12
+    push constant 16
+    lt
+    not
+    if-goto Enemy_23
+    push local 12
+    push constant 32
+    call Math.multiply 2
+    push local 8
+    add
+    pop local 10
+    push local 10
+    push this 9
+    add
+    pop pointer 1
+    push that 0
+    push constant 0
+    eq
+    not
+    if-goto Enemy_25
+    push this 2
+    push local 8
+    push local 12
+    call Map.isWall 3
+    not
+    not
+    if-goto Enemy_27
+    push local 10
+    push this 9
+    add
+    push constant 1
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push local 10
+    push this 10
+    add
+    push local 7
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push local 5
+    push this 8
+    add
+    push local 10
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push local 5
+    push constant 1
+    add
+    pop local 5
+    goto Enemy_26
+label Enemy_27
+label Enemy_26
+    goto Enemy_24
+label Enemy_25
+label Enemy_24
+    goto Enemy_22
+label Enemy_23
+label Enemy_22
+    push local 8
+    push constant 1
+    sub
+    pop local 11
+    push local 11
+    push constant 0
+    lt
+    not
+    not
+    if-goto Enemy_29
+    push local 9
+    push constant 32
+    call Math.multiply 2
+    push local 11
+    add
+    pop local 10
+    push local 10
+    push this 9
+    add
+    pop pointer 1
+    push that 0
+    push constant 0
+    eq
+    not
+    if-goto Enemy_31
+    push this 2
+    push local 11
+    push local 9
+    call Map.isWall 3
+    not
+    not
+    if-goto Enemy_33
+    push local 10
+    push this 9
+    add
+    push constant 1
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push local 10
+    push this 10
+    add
+    push local 7
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push local 5
+    push this 8
+    add
+    push local 10
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push local 5
+    push constant 1
+    add
+    pop local 5
+    goto Enemy_32
+label Enemy_33
+label Enemy_32
+    goto Enemy_30
+label Enemy_31
+label Enemy_30
+    goto Enemy_28
+label Enemy_29
+label Enemy_28
+    push local 8
+    push constant 1
+    add
+    pop local 11
+    push local 11
+    push constant 32
+    lt
+    not
+    if-goto Enemy_35
+    push local 9
+    push constant 32
+    call Math.multiply 2
+    push local 11
+    add
+    pop local 10
+    push local 10
+    push this 9
+    add
+    pop pointer 1
+    push that 0
+    push constant 0
+    eq
+    not
+    if-goto Enemy_37
+    push this 2
+    push local 11
+    push local 9
+    call Map.isWall 3
+    not
+    not
+    if-goto Enemy_39
+    push local 10
+    push this 9
+    add
+    push constant 1
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push local 10
+    push this 10
+    add
+    push local 7
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push local 5
+    push this 8
+    add
+    push local 10
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push local 5
+    push constant 1
+    add
+    pop local 5
+    goto Enemy_38
+label Enemy_39
+label Enemy_38
+    goto Enemy_36
+label Enemy_37
+label Enemy_36
+    goto Enemy_34
+label Enemy_35
+label Enemy_34
+    goto Enemy_8
+label Enemy_9
+    push constant 0
+    return
+function Enemy.chase 3
+    push argument 0
+    pop pointer 0
+    push argument 1
+    push constant 6
+    add
+    push constant 16
+    call Math.divide 2
+    pop local 0
+    push argument 2
+    push constant 6
+    add
+    push constant 16
+    call Math.divide 2
+    pop local 1
+    push local 0
+    push this 3
+    eq
+    not
+    push local 1
+    push this 4
+    eq
+    not
+    or
+    pop local 2
+    push local 2
+    push this 7
+    not
+    or
+    not
+    if-goto Enemy_41
+    push local 0
+    pop this 3
+    push local 1
+    pop this 4
+    push pointer 0
+    push local 0
+    push local 1
+    call Enemy.computeNextStep 3
+    not
+    if-goto Enemy_43
+    push constant 1
+    neg
+    pop this 7
+    goto Enemy_42
+label Enemy_43
+label Enemy_42
+    goto Enemy_40
+label Enemy_41
+label Enemy_40
+    push this 7
+    not
+    if-goto Enemy_45
+    push pointer 0
+    call Enemy.erase 1
+    pop temp 0
+    push this 5
+    push constant 16
+    call Math.multiply 2
+    push constant 2
+    add
+    pop this 0
+    push this 6
+    push constant 16
+    call Math.multiply 2
+    push constant 2
+    add
+    pop this 1
+    push pointer 0
+    call Enemy.draw 1
+    pop temp 0
+    push constant 0
+    pop this 7
+    goto Enemy_44
+label Enemy_45
+label Enemy_44
+    push constant 0
+    return
+function Enemy.collidesWith 0
+    push argument 0
+    pop pointer 0
+    push argument 1
+    push constant 11
+    add
+    push this 0
+    lt
+    not
+    if-goto Enemy_47
+    push constant 0
+    return
+    goto Enemy_46
+label Enemy_47
+label Enemy_46
+    push argument 1
+    push this 0
+    push constant 11
+    add
+    gt
+    not
+    if-goto Enemy_49
+    push constant 0
+    return
+    goto Enemy_48
+label Enemy_49
+label Enemy_48
+    push argument 2
+    push constant 11
+    add
+    push this 1
+    lt
+    not
+    if-goto Enemy_51
+    push constant 0
+    return
+    goto Enemy_50
+label Enemy_51
+label Enemy_50
+    push argument 2
+    push this 1
+    push constant 11
+    add
+    gt
+    not
+    if-goto Enemy_53
+    push constant 0
+    return
+    goto Enemy_52
+label Enemy_53
+label Enemy_52
+    push constant 1
+    neg
+    return

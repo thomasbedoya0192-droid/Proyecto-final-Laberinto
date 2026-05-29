@@ -1,0 +1,69 @@
+/**
+ * Random.jack: Generador pseudo-aleatorio basado en LCG (Linear
+ * Congruential Generator).
+ *
+ * Formula: state = (state * 75 + 74) mod 2^16
+ *   - Multiplicador 75 y suma 74 son coprimos con 2^16, lo que
+ *     da periodo completo de 65536.
+ *   - El overflow de Jack int (16 bits con signo) actua como el
+ *     "mod 2^16" implicito.
+ *   - Tras cada paso normalizamos a positivo y evitamos 0.
+ *
+ * Es deficiente para criptografia pero mas que suficiente para
+ * decidir spawns en un laberinto. Jack no tiene RNG nativo y LFSR
+ * requiere XOR (no disponible sin tabla de bits), por eso elegimos
+ * LCG.
+ *
+ * Uso:
+ *   var Random rng;
+ *   let rng = Random.new(seed);
+ *   let r = rng.next();            // 1..32767
+ *   let r = rng.nextRange(N);      // 0..N-1
+ *
+ * Seed: sembrar con un valor dependiente del usuario (ticks hasta
+ * la primera tecla) para que cada partida sea distinta.
+ */
+class Random {
+    field int state;
+
+    constructor Random new(int seed) {
+        let state = seed;
+        if (state = 0) { let state = 1; }
+        return this;
+    }
+
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    /**
+     * Avanza el estado y devuelve un entero positivo (1..32767).
+     * Garantiza que no devuelve 0 para que nextRange no degenere.
+     *
+     * Nota sobre -32768: es el unico int donde -x desborda y se queda
+     * en si mismo. No podemos escribir el literal -32768 en Jack porque
+     * el VM rechaza la constante 32768. Lo detectamos con la propiedad:
+     * state < 0 Y (state + 32767) < 0 -> solo se cumple para -32768.
+     */
+    method int next() {
+        let state = (state * 75) + 74;
+        if ((state < 0) & ((state + 32767) < 0)) {
+            let state = 1;
+        }
+        if (state < 0) { let state = -state; }
+        if (state = 0) { let state = 1; }
+        return state;
+    }
+
+    /**
+     * Devuelve un pseudoaleatorio en [0, n-1]. n <= 0 -> 0.
+     * Modulo simulado: r - (r/n)*n.
+     */
+    method int nextRange(int n) {
+        var int r;
+        if (n < 1) { return 0; }
+        let r = next();
+        return r - ((r / n) * n);
+    }
+}

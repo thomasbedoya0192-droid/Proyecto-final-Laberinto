@@ -1,0 +1,449 @@
+/**
+ * Map.jack: Gestiona la matriz del laberinto, su renderizado en pantalla
+ * y la consulta de colisiones a nivel de celda.
+ *
+ * Modelo:
+ *   - Grilla logica de 32 columnas x 16 filas (512 celdas).
+ *   - Cada celda mide 16x16 pixeles -> ocupa toda la pantalla 512x256.
+ *   - 0 = camino libre, 1 = muro.
+ *
+ * Layout:
+ *   - Marco perimetral cerrado (filas 0/15 y columnas 0/31 son muro).
+ *   - Muros internos formando pasillos sinuosos al estilo del PDF.
+ */
+class Map {
+    field Array grid;        // arreglo 1D de 512 enteros (row*32 + col)
+    field int cols, rows;    // 32 y 16
+    field int cellSize;      // 16 pixeles por celda
+
+    /** Construye el mapa con todos los muros definidos. */
+    constructor Map new() {
+        let cols = 32;
+        let rows = 16;
+        let cellSize = 16;
+        let grid = Array.new(512);
+
+        do clearGrid();
+        do buildBorders();
+        do buildInnerWalls();
+
+        return this;
+    }
+
+    /** Inicializa toda la grilla a 0 (camino libre). */
+    method void clearGrid() {
+        var int i;
+        let i = 0;
+        while (i < 512) {
+            let grid[i] = 0;
+            let i = i + 1;
+        }
+        return;
+    }
+
+    /** Construye el marco perimetral cerrado. */
+    method void buildBorders() {
+        var int i;
+
+        // Bordes horizontales: fila 0 (arriba) y fila 15 (abajo).
+        let i = 0;
+        while (i < cols) {
+            let grid[i] = 1;            // fila 0
+            let grid[480 + i] = 1;      // fila 15 (15 * 32 = 480)
+            let i = i + 1;
+        }
+
+        // Bordes verticales: columna 0 (izquierda) y columna 31 (derecha).
+        let i = 0;
+        while (i < rows) {
+            let grid[i * cols] = 1;            // columna 0
+            let grid[(i * cols) + 31] = 1;     // columna 31
+            let i = i + 1;
+        }
+        return;
+    }
+
+    /**
+     * Construye los muros internos. Cada llamada a setWall(c, r) marca una
+     * celda como muro. El layout sigue el espiritu del laberinto del PDF
+     * adaptado a 32x16: pasillos de 1 celda de ancho, callejones sin
+     * salida, y multiples caminos para evitar atrapar al jugador.
+     */
+    method void buildInnerWalls() {
+        // Fila 2: bloques de 4 muros con huecos
+        do setWall(2, 2);   do setWall(3, 2);   do setWall(4, 2);   do setWall(5, 2);
+        do setWall(7, 2);
+        do setWall(9, 2);   do setWall(10, 2);  do setWall(11, 2);  do setWall(12, 2);  do setWall(13, 2);
+        do setWall(15, 2);
+        do setWall(17, 2);  do setWall(18, 2);  do setWall(19, 2);  do setWall(20, 2);  do setWall(21, 2);
+        do setWall(23, 2);
+        do setWall(25, 2);  do setWall(26, 2);  do setWall(27, 2);  do setWall(28, 2);  do setWall(29, 2);
+
+        // Fila 3
+        do setWall(2, 3);
+        do setWall(9, 3);
+        do setWall(21, 3);
+        do setWall(29, 3);
+
+        // Fila 4
+        do setWall(2, 4);
+        do setWall(4, 4);   do setWall(5, 4);   do setWall(6, 4);   do setWall(7, 4);   do setWall(8, 4);   do setWall(9, 4);
+        do setWall(11, 4);  do setWall(12, 4);  do setWall(13, 4);  do setWall(14, 4);  do setWall(15, 4);
+        do setWall(16, 4);  do setWall(17, 4);  do setWall(18, 4);  do setWall(19, 4);
+        do setWall(21, 4);  do setWall(22, 4);  do setWall(23, 4);  do setWall(24, 4);  do setWall(25, 4);
+        do setWall(26, 4);  do setWall(27, 4);
+        do setWall(29, 4);
+
+        // Fila 5
+        do setWall(4, 5);
+        do setWall(15, 5);
+        do setWall(27, 5);
+
+        // Fila 6
+        do setWall(1, 6);   do setWall(2, 6);
+        do setWall(4, 6);
+        do setWall(6, 6);   do setWall(7, 6);   do setWall(8, 6);   do setWall(9, 6);   do setWall(10, 6);
+        do setWall(11, 6);  do setWall(12, 6);  do setWall(13, 6);
+        do setWall(15, 6);
+        do setWall(17, 6);  do setWall(18, 6);  do setWall(19, 6);  do setWall(20, 6);  do setWall(21, 6);
+        do setWall(22, 6);  do setWall(23, 6);  do setWall(24, 6);  do setWall(25, 6);
+        do setWall(27, 6);  do setWall(28, 6);  do setWall(29, 6);
+
+        // Fila 7
+        do setWall(6, 7);
+        do setWall(25, 7);
+
+        // Fila 8
+        do setWall(2, 8);   do setWall(3, 8);   do setWall(4, 8);   do setWall(5, 8);   do setWall(6, 8);
+        do setWall(8, 8);   do setWall(9, 8);   do setWall(10, 8);  do setWall(11, 8);  do setWall(12, 8);
+        do setWall(13, 8);  do setWall(14, 8);  do setWall(15, 8);
+        // Col 16, fila 8: hueco abierto a proposito para conectar el corredor
+        // superior con el inferior. Hueco de 1 celda (16x16 px) es suficiente
+        // para que pasen los sprites de 12x12.
+        do setWall(17, 8);
+        do setWall(18, 8);  do setWall(19, 8);  do setWall(20, 8);  do setWall(21, 8);  do setWall(22, 8);
+        do setWall(25, 8);
+        do setWall(27, 8);  do setWall(28, 8);  do setWall(29, 8);  do setWall(30, 8);
+
+        // Fila 9
+        do setWall(13, 9);
+        do setWall(22, 9);
+        do setWall(24, 9);  do setWall(25, 9);
+
+        // Fila 10
+        do setWall(1, 10);  do setWall(2, 10);  do setWall(3, 10);  do setWall(4, 10);  do setWall(5, 10);
+        do setWall(7, 10);  do setWall(8, 10);  do setWall(9, 10);  do setWall(10, 10); do setWall(11, 10);
+        do setWall(13, 10);
+        do setWall(15, 10); do setWall(16, 10);
+        // Col 17, fila 10: hueco abierto a proposito para conectar el nicho
+        // de (17, 11) con el corredor superior. Asi la IA del enemigo puede
+        // escapar verticalmente del callejon en lugar de quedar atrapada.
+        do setWall(18, 10); do setWall(19, 10);
+        do setWall(22, 10);
+        do setWall(27, 10); do setWall(28, 10); do setWall(29, 10);
+
+        // Fila 11
+        do setWall(7, 11);
+        do setWall(13, 11);
+        do setWall(15, 11);
+        do setWall(19, 11);
+        do setWall(21, 11); do setWall(22, 11); do setWall(23, 11); do setWall(24, 11); do setWall(25, 11);
+        do setWall(29, 11);
+
+        // Fila 12
+        do setWall(2, 12);  do setWall(3, 12);  do setWall(4, 12);  do setWall(5, 12);  do setWall(6, 12);
+        do setWall(7, 12);
+        do setWall(9, 12);  do setWall(10, 12); do setWall(11, 12); do setWall(12, 12); do setWall(13, 12);
+        do setWall(15, 12);
+        do setWall(17, 12);
+        do setWall(19, 12);
+        do setWall(27, 12);
+
+        // Fila 13
+        do setWall(2, 13);
+        do setWall(15, 13);
+        do setWall(17, 13);
+        do setWall(21, 13); do setWall(22, 13); do setWall(23, 13); do setWall(24, 13);
+        do setWall(25, 13); do setWall(26, 13); do setWall(27, 13);
+        do setWall(29, 13);
+
+        // Fila 14
+        do setWall(4, 14);  do setWall(5, 14);  do setWall(6, 14);  do setWall(7, 14);  do setWall(8, 14);
+        do setWall(9, 14);  do setWall(10, 14); do setWall(11, 14); do setWall(12, 14); do setWall(13, 14);
+        do setWall(17, 14); do setWall(18, 14); do setWall(19, 14);
+
+        return;
+    }
+
+    /** Marca la celda (col, row) como muro. */
+    method void setWall(int col, int row) {
+        let grid[(row * cols) + col] = 1;
+        return;
+    }
+
+    /** Dibuja todo el laberinto en pantalla. */
+    method void draw() {
+        var int row, col, index;
+        var int x, y;
+
+        do Screen.setColor(true);
+        let row = 0;
+        let index = 0;
+
+        while (row < rows) {
+            let col = 0;
+            while (col < cols) {
+                if (grid[index] = 1) {
+                    let x = col * cellSize;
+                    let y = row * cellSize;
+                    do Screen.drawRectangle(x, y, x + 15, y + 15);
+                }
+                let col = col + 1;
+                let index = index + 1;
+            }
+            let row = row + 1;
+        }
+        return;
+    }
+
+    /**
+     * Consulta si la celda (col, row) es muro.
+     * Coordenadas fuera de la grilla se tratan como muro (proteccion
+     * defensiva contra accesos fuera de rango).
+     */
+    method boolean isWall(int col, int row) {
+        var int index;
+
+        if (col < 0)      { return true; }
+        if (col > 31)     { return true; }
+        if (row < 0)      { return true; }
+        if (row > 15)     { return true; }
+
+        let index = (row * cols) + col;
+        if (grid[index] = 1) { return true; }
+        return false;
+    }
+
+    /**
+     * Comprueba si un rectangulo en coordenadas de pixel colisiona con
+     * algun muro. Se evaluan las 4 esquinas del rectangulo (bounding box)
+     * mapeadas a celdas mediante division entera por 16.
+     *
+     * Devuelve true si HAY colision (alguna esquina cae en muro) y false
+     * si las 4 esquinas estan en camino libre.
+     */
+    method boolean collidesPixelRect(int xLeft, int yTop, int xRight, int yBottom) {
+        var int cLeft, cRight, rTop, rBottom;
+
+        let cLeft = xLeft / 16;
+        let cRight = xRight / 16;
+        let rTop = yTop / 16;
+        let rBottom = yBottom / 16;
+
+        if (isWall(cLeft, rTop))     { return true; }
+        if (isWall(cRight, rTop))    { return true; }
+        if (isWall(cLeft, rBottom))  { return true; }
+        if (isWall(cRight, rBottom)) { return true; }
+        return false;
+    }
+
+    /**
+     * Escribe en out[0]=col, out[1]=row una celda interior libre
+     * aleatoria. Intenta hasta 200 veces antes de hacer un escaneo
+     * lineal como fallback.
+     *
+     * "Interior" significa: col en 1..30, row en 1..14 (excluye marco).
+     */
+    method void randomFreeCell(Random rng, Array out) {
+        var int attempts, c, r;
+        let attempts = 0;
+        while (attempts < 200) {
+            let c = rng.nextRange(30) + 1;   // 1..30
+            let r = rng.nextRange(14) + 1;   // 1..14
+            if (~isWall(c, r)) {
+                let out[0] = c;
+                let out[1] = r;
+                return;
+            }
+            let attempts = attempts + 1;
+        }
+        // Fallback: escaneo lineal
+        let r = 1;
+        while (r < 15) {
+            let c = 1;
+            while (c < 31) {
+                if (~isWall(c, r)) {
+                    let out[0] = c;
+                    let out[1] = r;
+                    return;
+                }
+                let c = c + 1;
+            }
+            let r = r + 1;
+        }
+        // No deberia llegar aqui (el mapa tiene celdas libres garantizadas)
+        let out[0] = 1;
+        let out[1] = 1;
+        return;
+    }
+
+    /**
+     * Escribe en out una celda libre cuya distancia Manhattan (en
+     * celdas) a (fromCol, fromRow) este en [minDist, maxDist] y que
+     * NO sea la celda (excludeCol, excludeRow). Pasar excludeCol=-1
+     * para no excluir nada.
+     *
+     * Intenta hasta 400 veces. Si no encuentra ninguna, relaja el
+     * criterio: escanea linealmente y devuelve la celda libre con
+     * distancia mas cercana al rango (sin importar exclusion).
+     */
+    method void randomFreeCellAtDistance(Random rng, int fromCol, int fromRow,
+                                          int minDist, int maxDist,
+                                          int excludeCol, int excludeRow, Array out) {
+        var int attempts, c, r, dist;
+        var int bestC, bestR, bestPenalty, penalty;
+
+        let attempts = 0;
+        while (attempts < 400) {
+            let c = rng.nextRange(30) + 1;
+            let r = rng.nextRange(14) + 1;
+            if (~isWall(c, r)) {
+                if (~((c = excludeCol) & (r = excludeRow))) {
+                    let dist = manhattanCells(c, r, fromCol, fromRow);
+                    if ((~(dist < minDist)) & (~(dist > maxDist))) {
+                        let out[0] = c;
+                        let out[1] = r;
+                        return;
+                    }
+                }
+            }
+            let attempts = attempts + 1;
+        }
+
+        // Fallback: escaneo lineal, eligiendo celda con menor penalty
+        // (distancia al rango deseado). Aqui SI puede caer en la
+        // celda excluida si no hay alternativa razonable.
+        let bestC = 1;
+        let bestR = 1;
+        let bestPenalty = 32767;
+        let r = 1;
+        while (r < 15) {
+            let c = 1;
+            while (c < 31) {
+                if (~isWall(c, r)) {
+                    if (~((c = excludeCol) & (r = excludeRow))) {
+                        let dist = manhattanCells(c, r, fromCol, fromRow);
+                        if (dist < minDist) {
+                            let penalty = minDist - dist;
+                        } else {
+                            if (dist > maxDist) {
+                                let penalty = dist - maxDist;
+                            } else {
+                                let penalty = 0;
+                            }
+                        }
+                        if (penalty < bestPenalty) {
+                            let bestPenalty = penalty;
+                            let bestC = c;
+                            let bestR = r;
+                        }
+                    }
+                }
+                let c = c + 1;
+            }
+            let r = r + 1;
+        }
+        let out[0] = bestC;
+        let out[1] = bestR;
+        return;
+    }
+
+    /** Distancia Manhattan en unidades de celda. */
+    method int manhattanCells(int c1, int r1, int c2, int r2) {
+        var int dc, dr;
+        let dc = c1 - c2;
+        if (dc < 0) { let dc = -dc; }
+        let dr = r1 - r2;
+        if (dr < 0) { let dr = -dr; }
+        return dc + dr;
+    }
+
+    /**
+     * Busca la celda libre interior mas cercana a (targetCol, targetRow)
+     * (incluida ella misma si es libre). Util para "reflejar" al enemigo
+     * a la posicion contraria del jugador y caer en celda valida aunque
+     * la reflejada exacta sea muro.
+     *
+     * Escaneo en anillos crecientes hasta encontrar una celda libre.
+     * Como el mapa es chico (32x16), el anillo maximo es ~30.
+     */
+    method void nearestFreeCell(int targetCol, int targetRow, Array out) {
+        var int ring, c, r;
+        if (~isWall(targetCol, targetRow)) {
+            // Verificar que sea interior (no marco)
+            if ((targetCol > 0) & (targetCol < 31) & (targetRow > 0) & (targetRow < 15)) {
+                let out[0] = targetCol;
+                let out[1] = targetRow;
+                return;
+            }
+        }
+        let ring = 1;
+        while (ring < 32) {
+            // Recorrer el perimetro del anillo
+            // Top y bottom del anillo
+            let c = targetCol - ring;
+            while (~(c > (targetCol + ring))) {
+                let r = targetRow - ring;
+                if ((c > 0) & (c < 31) & (r > 0) & (r < 15)) {
+                    if (~isWall(c, r)) {
+                        let out[0] = c;
+                        let out[1] = r;
+                        return;
+                    }
+                }
+                let r = targetRow + ring;
+                if ((c > 0) & (c < 31) & (r > 0) & (r < 15)) {
+                    if (~isWall(c, r)) {
+                        let out[0] = c;
+                        let out[1] = r;
+                        return;
+                    }
+                }
+                let c = c + 1;
+            }
+            // Lados izq y der (sin esquinas que ya cubrieron arriba)
+            let r = targetRow - ring + 1;
+            while (r < (targetRow + ring)) {
+                let c = targetCol - ring;
+                if ((c > 0) & (c < 31) & (r > 0) & (r < 15)) {
+                    if (~isWall(c, r)) {
+                        let out[0] = c;
+                        let out[1] = r;
+                        return;
+                    }
+                }
+                let c = targetCol + ring;
+                if ((c > 0) & (c < 31) & (r > 0) & (r < 15)) {
+                    if (~isWall(c, r)) {
+                        let out[0] = c;
+                        let out[1] = r;
+                        return;
+                    }
+                }
+                let r = r + 1;
+            }
+            let ring = ring + 1;
+        }
+        // Fallback final
+        let out[0] = 1;
+        let out[1] = 1;
+        return;
+    }
+
+    /** Libera la memoria. */
+    method void dispose() {
+        do grid.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+}

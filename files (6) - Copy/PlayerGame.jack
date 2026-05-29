@@ -1,0 +1,213 @@
+/**
+ * PlayerGame.jack: Game loop principal.
+ *
+ * Setup aleatorio por partida:
+ *   - Jugador en celda interior libre aleatoria.
+ *   - Enemigo en la celda libre mas cercana a la posicion REFLEJADA
+ *     del jugador (cuadrante opuesto).
+ *   - Meta en celda libre cuya distancia Manhattan (en celdas) al
+ *     jugador este en 18..24, lo suficiente para ser desafiante.
+ *
+ * Aleatoriedad: el seed del RNG se forma con cuantos ticks tarda
+ * el jugador en pulsar la primera tecla. Cada partida es diferente.
+ *
+ * Condiciones de fin:
+ *   - El enemigo solapa al jugador     -> GAME OVER.
+ *   - El jugador solapa la meta         -> ESCAPASTE.
+ *   - El jugador pulsa Q                -> salida voluntaria.
+ *
+ * Controles:
+ *   131=Up, 133=Down, 130=Left, 132=Right, 81=Q (salir).
+ */
+class PlayerGame {
+    field Map gameMap;
+    field Player player;
+    field Enemy enemy;
+    field Goal goal;
+    field Random rng;
+
+    field int direction;     // 0=nada, 1=up, 2=down, 3=left, 4=right
+    field int frameCount;    // contador para ritmar la IA del enemigo
+    field boolean gameOver;  // enemigo atrapo al jugador
+    field boolean victory;   // jugador llego a la meta
+    field boolean restart;   // tras fin: true si quiere reiniciar
+
+    /**
+     * Crea el juego. El parametro 'seed' siembra el RNG; Main lo
+     * obtiene midiendo cuantos ticks tarda el usuario en pulsar
+     * la primera tecla, garantizando que cada partida sea distinta.
+     */
+    constructor PlayerGame new(int seed) {
+        var Array tmp;            // out param para randomFreeCell
+        var int pCol, pRow;       // celda del jugador
+        var int eCol, eRow;       // celda del enemigo
+        var int gCol, gRow;       // celda de la meta
+        var int attempts;         // contador para retry de spawn
+
+        let gameMap = Map.new();
+        do Screen.clearScreen();
+        do gameMap.draw();
+
+        if (seed = 0) { let seed = 12345; }
+        let rng = Random.new(seed);
+
+        // Out param compartido (Array de 2 ints)
+        let tmp = Array.new(2);
+
+        // 1) Jugador y enemigo: spawn aleatorio del jugador, enemigo
+        //    en el reflejo. Si quedaron demasiado cerca (distancia < 15
+        //    celdas), reintentamos hasta 30 veces buscando un spawn
+        //    donde la separacion inicial sea desafiante.
+        do gameMap.randomFreeCell(rng, tmp);
+        let pCol = tmp[0];
+        let pRow = tmp[1];
+        do gameMap.nearestFreeCell(31 - pCol, 15 - pRow, tmp);
+        let eCol = tmp[0];
+        let eRow = tmp[1];
+
+        let attempts = 0;
+        while ((gameMap.manhattanCells(pCol, pRow, eCol, eRow) < 15) & (attempts < 30)) {
+            do gameMap.randomFreeCell(rng, tmp);
+            let pCol = tmp[0];
+            let pRow = tmp[1];
+            do gameMap.nearestFreeCell(31 - pCol, 15 - pRow, tmp);
+            let eCol = tmp[0];
+            let eRow = tmp[1];
+            let attempts = attempts + 1;
+        }
+
+        // 2) Meta: celda libre a distancia 18..24 del jugador, excluyendo
+        //    la celda donde va el enemigo (para que la meta no caiga sobre el).
+        do gameMap.randomFreeCellAtDistance(rng, pCol, pRow, 18, 24, eCol, eRow, tmp);
+        let gCol = tmp[0];
+        let gRow = tmp[1];
+
+        do tmp.dispose();
+
+        // Crear sprites (offset +2 dentro de celda 16x16 para centrar 12x12)
+        let player = Player.new((pCol * 16) + 2, (pRow * 16) + 2, gameMap);
+        let enemy = Enemy.new((eCol * 16) + 2, (eRow * 16) + 2, gameMap);
+        let goal = Goal.new((gCol * 16) + 2, (gRow * 16) + 2);
+
+        let direction = 0;
+        let frameCount = 0;
+        let gameOver = false;
+        let victory = false;
+        let restart = false;
+        return this;
+    }
+
+    method void dispose() {
+        do goal.dispose();
+        do enemy.dispose();
+        do player.dispose();
+        do gameMap.dispose();
+        do rng.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    method boolean wantsRestart() { return restart; }
+
+    /**
+     * Avanza un frame: mueve jugador y enemigo, chequea colisiones
+     * (con enemigo -> game over, con meta -> victoria).
+     */
+    method void tick() {
+        if (direction = 1) { do player.moveUp(); }
+        if (direction = 2) { do player.moveDown(); }
+        if (direction = 3) { do player.moveLeft(); }
+        if (direction = 4) { do player.moveRight(); }
+
+        // Enemigo se mueve cada 6 frames.
+        let frameCount = frameCount + 1;
+        if ((frameCount / 6) * 6 = frameCount) {
+            do enemy.chase(player.getX(), player.getY());
+        }
+
+        // Chequear colisiones
+        if (enemy.collidesWith(player.getX(), player.getY())) {
+            let gameOver = true;
+        }
+        if (goal.collidesWith(player.getX(), player.getY())) {
+            let victory = true;
+        }
+
+        do Sys.wait(15);
+        return;
+    }
+
+    method void run() {
+        var char key;
+        var boolean exit;
+        let exit = false;
+        let key = 0;
+
+        while (~exit) {
+            while ((key = 0) & (~gameOver) & (~victory)) {
+                let key = Keyboard.keyPressed();
+                do tick();
+            }
+
+            if (gameOver | victory) {
+                let exit = true;
+            } else {
+                if (key = 81)  { let exit = true; }
+                if (key = 131) { let direction = 1; }
+                if (key = 133) { let direction = 2; }
+                if (key = 130) { let direction = 3; }
+                if (key = 132) { let direction = 4; }
+
+                while ((~(key = 0)) & (~gameOver) & (~victory)) {
+                    let key = Keyboard.keyPressed();
+                    do tick();
+                }
+                let direction = 0;
+                if (gameOver | victory) { let exit = true; }
+            }
+        }
+
+        if (gameOver)  { do showGameOver(); }
+        if (victory)   { do showVictory(); }
+        return;
+    }
+
+    /**
+     * Pantalla de Game Over. Tras esperar tecla:
+     *   Q  -> sale
+     *   otra -> reinicia
+     */
+    method void showGameOver() {
+        var char k;
+        do Output.moveCursor(11, 27);
+        do Output.printString("GAME OVER");
+        do Output.moveCursor(13, 15);
+        do Output.printString("Pulsa cualquier tecla (Q = salir)");
+
+        // Drenar tecla previa
+        while (~(Keyboard.keyPressed() = 0)) { }
+        // Esperar nueva
+        let k = 0;
+        while (k = 0) { let k = Keyboard.keyPressed(); }
+        if (k = 81) { let restart = false; } else { let restart = true; }
+        // Drenar antes de devolver
+        while (~(Keyboard.keyPressed() = 0)) { }
+        return;
+    }
+
+    /** Pantalla de victoria. Misma logica de reinicio que game over. */
+    method void showVictory() {
+        var char k;
+        do Output.moveCursor(11, 27);
+        do Output.printString("Escapaste!");
+        do Output.moveCursor(13, 15);
+        do Output.printString("Pulsa cualquier tecla (Q = salir)");
+
+        while (~(Keyboard.keyPressed() = 0)) { }
+        let k = 0;
+        while (k = 0) { let k = Keyboard.keyPressed(); }
+        if (k = 81) { let restart = false; } else { let restart = true; }
+        while (~(Keyboard.keyPressed() = 0)) { }
+        return;
+    }
+}
